@@ -139,7 +139,7 @@ function SpawnYacht(yachtId, targetPed)
 
     local spawnCoords = GlobalState[coordsKey]
     local veh = CreateVehicleServerSetter(
-        GetHashKey("djn_yacht_veh"),
+        GetHashKey("as_yacht_veh"),
         "boat",
         spawnCoords.x,
         spawnCoords.y,

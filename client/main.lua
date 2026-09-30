@@ -154,7 +154,7 @@ local isTargetSystemReady = false
 local isPlayerNearBuyLocation = false
 
 
-local yachtModelHash = GetHashKey("djn_yacht_veh")
+local yachtModelHash = GetHashKey("as_yacht_veh")
 
 
 local flagObjectsList = {
@@ -1003,7 +1003,7 @@ end
 
 function YachtSpawnBuy(sessionId)
     sessionId = sessionId or previewSessionId
-    if not WaitForPreviewModel(yachtModelHash, "djn_yacht_veh", sessionId) then
+    if not WaitForPreviewModel(yachtModelHash, "as_yacht_veh", sessionId) then
         ClearYachtBuyPreview(sessionId)
         return
     end
@@ -1878,7 +1878,7 @@ AddEventHandler("asyacht:Global:YachtMaximumSynchronize", function(yachtId)
         local vehNetId = GlobalState["asyacht-" .. yachtId .. "-vehid"]
         if vehNetId and NetworkDoesNetworkIdExist(vehNetId) then
             local driveVeh = NetToVeh(vehNetId)
-            if DoesEntityExist(driveVeh) and GetEntityModel(driveVeh) == GetHashKey("djn_yacht_veh") then
+            if DoesEntityExist(driveVeh) and GetEntityModel(driveVeh) == GetHashKey("as_yacht_veh") then
                 if DoesEntityExist(yachtData.yachtmainobject) then
                     SetEntityNoCollisionEntity(yachtData.yachtmainobject, driveVeh, true)
                     AttachEntityToEntity(yachtData.yachtmainobject, driveVeh, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, false, false, 5, true)
