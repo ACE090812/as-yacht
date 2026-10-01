@@ -590,8 +590,8 @@ Config.BasicEquipment = {
 	["849624563"] = {furnituremodel = "hei_heist_din_chair_05", furniturecoords = vector3(2.631, 18.667, 8.444), furniturerotation = vector3(-0.010, 0.006, 0.000)},
 	["127525849"] = {furnituremodel = "hei_heist_din_chair_05", furniturecoords = vector3(3.780, 17.391, 8.444), furniturerotation = vector3(-0.010, 0.006, -90.000)},
 	["523845127"] = {furnituremodel = "hei_heist_din_chair_05", furniturecoords = vector3(2.618, 16.267, 8.444), furniturerotation = vector3(-0.010, 0.006, -180.000)},
-	["844224463"] = {furnituremodel = "rtx_yacht_djn_massage_lounger_1", furniturecoords = vector3(-3.208, 9.442, 2.337), furniturerotation = vector3(0.000, -0.000, -180.000)},
-	["844124563"] = {furnituremodel = "rtx_yacht_djn_massage_lounger_1", furniturecoords = vector3(1.093, 9.442, 2.337), furniturerotation = vector3(0.000, -0.000, -180.000)},
+	["844224463"] = {furnituremodel = "as_yacht_massage_lounger_1", furniturecoords = vector3(-3.208, 9.442, 2.337), furniturerotation = vector3(0.000, -0.000, -180.000)},
+	["844124563"] = {furnituremodel = "as_yacht_massage_lounger_1", furniturecoords = vector3(1.093, 9.442, 2.337), furniturerotation = vector3(0.000, -0.000, -180.000)},
 	["127461849"] = {furnituremodel = "m24_1_prop_m41_lounger_01a", furniturecoords = vector3(0.383, 1.526, 2.339), furniturerotation = vector3(0.000, -0.000, 180.000)},
 	["563846127"] = {furnituremodel = "m24_1_prop_m41_coftableb_01a", furniturecoords = vector3(-0.477, 1.789, 2.337), furniturerotation = vector3(0.000, -0.000, 90.000)},
 	["849522563"] = {furnituremodel = "m24_1_prop_m41_lounger_01a", furniturecoords = vector3(-1.390, 1.526, 2.339), furniturerotation = vector3(0.000, -0.000, 180.000)},
@@ -600,7 +600,7 @@ Config.BasicEquipment = {
 	["849127263"] = {furnituremodel = "m24_1_prop_m41_coftableb_01a", furniturecoords = vector3(1.210, 1.789, 2.337), furniturerotation = vector3(0.000, -0.000, 90.000)},
 	["127563649"] = {furnituremodel = "m24_1_prop_m41_lounger_01a", furniturecoords = vector3(2.018, 1.526, 2.339), furniturerotation = vector3(0.000, -0.000, 180.000)},
 	["513242122"] = {furnituremodel = "ch_chint03_plan_lockers", furniturecoords = vector3(6.962, 4.503, 3.397), furniturerotation = vector3(-0.000, -0.000, 180.000)},
-	["849128563"] = {furnituremodel = "rtx_yacht_djn_paravan_1", furniturecoords = vector3(-0.988, 9.018, 3.330), furniturerotation = vector3(0.000, -0.000, 90.000)},
+	["849128563"] = {furnituremodel = "as_yacht_paravan_1", furniturecoords = vector3(-0.988, 9.018, 3.330), furniturerotation = vector3(0.000, -0.000, 90.000)},
 }
 
 Config.Furnitures = {
@@ -929,11 +929,10 @@ Config.Furnitures = {
 			{furnitureprice = 100, furnitureobject ="prop_pooltable_02"},
 			{furnitureprice = 100, furnitureobject ="ch_prop_arcade_love_01a"},
 			{furnitureprice = 100, furnitureobject ="prop_bball_arcade_01"},
-			{furnitureprice = 100, furnitureobject ="rtx_djn_bang_a_beaver_base"},
+			{furnitureprice = 100, furnitureobject ="as_bang_a_beaver_base"},
 			{furnitureprice = 100, furnitureobject ="sum_prop_arcade_str_bar_01a"},
 			{furnitureprice = 100, furnitureobject ="ch_prop_arcade_claw_01a"},
 			{furnitureprice = 100, furnitureobject ="ch_prop_arcade_fortune_01a"},
-			{furnitureprice = 100, furnitureobject ="djn_table_football_1"},
         }
     },
     {

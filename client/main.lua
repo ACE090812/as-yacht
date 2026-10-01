@@ -215,31 +215,31 @@ local anchorRailingTypesList = {
 setmetatable(anchorRailingTypesList, { __index = function(t, k) return rawget(t, 1) end })
 
 function GetLightColorObject(category, colorId)
-    local defaultObject = "rtx_apa_mp_apa_y3_l2a"
+    local defaultObject = "as_apa_mp_apa_y3_l2a"
 
     if category == 1 then
         local l2Options = {
-            {lightobject = "rtx_apa_mp_apa_y3_l2a"},
-            {lightobject = "rtx_apa_mp_apa_y3_l2b"},
-            {lightobject = "rtx_apa_mp_apa_y3_l2c"},
-            {lightobject = "rtx_apa_mp_apa_y3_l2d"},
-            {lightobject = "rtx_apa_mp_apa_y3_l2p"},
-            {lightobject = "rtx_apa_mp_apa_y3_l2r"},
-            {lightobject = "rtx_apa_mp_apa_y3_l2o"},
-            {lightobject = "rtx_apa_mp_apa_y3_l2w"},
+            {lightobject = "as_apa_mp_apa_y3_l2a"},
+            {lightobject = "as_apa_mp_apa_y3_l2b"},
+            {lightobject = "as_apa_mp_apa_y3_l2c"},
+            {lightobject = "as_apa_mp_apa_y3_l2d"},
+            {lightobject = "as_apa_mp_apa_y3_l2p"},
+            {lightobject = "as_apa_mp_apa_y3_l2r"},
+            {lightobject = "as_apa_mp_apa_y3_l2o"},
+            {lightobject = "as_apa_mp_apa_y3_l2w"},
         }
         local opt = l2Options[colorId]
         return opt and opt.lightobject or defaultObject
     elseif category == 2 then
         local l1Options = {
-            {lightobject = "rtx_apa_mp_apa_y3_l1a"},
-            {lightobject = "rtx_apa_mp_apa_y3_l1b"},
-            {lightobject = "rtx_apa_mp_apa_y3_l1c"},
-            {lightobject = "rtx_apa_mp_apa_y3_l1d"},
-            {lightobject = "rtx_apa_mp_apa_y3_l1p"},
-            {lightobject = "rtx_apa_mp_apa_y3_l1r"},
-            {lightobject = "rtx_apa_mp_apa_y3_l1o"},
-            {lightobject = "rtx_apa_mp_apa_y3_l1w"},
+            {lightobject = "as_apa_mp_apa_y3_l1a"},
+            {lightobject = "as_apa_mp_apa_y3_l1b"},
+            {lightobject = "as_apa_mp_apa_y3_l1c"},
+            {lightobject = "as_apa_mp_apa_y3_l1d"},
+            {lightobject = "as_apa_mp_apa_y3_l1p"},
+            {lightobject = "as_apa_mp_apa_y3_l1r"},
+            {lightobject = "as_apa_mp_apa_y3_l1o"},
+            {lightobject = "as_apa_mp_apa_y3_l1w"},
         }
         local opt = l1Options[colorId]
         return opt and opt.lightobject or defaultObject
@@ -411,26 +411,26 @@ local yachtBuyState = {
     yachtbuyobject = nil,
 
     mainobjects = {
-        {handler=nil, objectname="djn_yacht_bar_details",              offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_bridge_details",           offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_engine_details_room_1",    offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_engine_details_room_2",    offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_engine_room_entry",        offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_int_wellness_rooms_details",offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_main_hall",                offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_room1_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_room2_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yacht_room3_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_yachta_entry_room_details",      offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_bar_details",              offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_bridge_details",           offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_engine_details_room_1",    offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_engine_details_room_2",    offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_engine_room_entry",        offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_int_wellness_rooms_details",offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_main_hall",                offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_room1_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_room2_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yacht_room3_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+        {handler=nil, objectname="as_yachta_entry_room_details",      offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
         
         {handler=nil, objectname="apa_prop_ap_stern_text",  offsetcoords=vector3(-2.0,  -0.65, 17.1), offsetrotation=vector3(10,0,90)},
         {handler=nil, objectname="apa_prop_ap_starb_text",  offsetcoords=vector3(-2.05,  0.0,   5.8), offsetrotation=vector3(0,0,90)},
         {handler=nil, objectname="apa_prop_ap_port_text",   offsetcoords=vector3(-2.05,  0.0,   5.8), offsetrotation=vector3(0,0,90)},
         
         {handler=nil, objectname="apa_mp_apa_yacht_win",    offsetcoords=vector3(-2.05,  0.0,   5.9), offsetrotation=vector3(0,0,90)},
-        {handler=nil, objectname="djn_apa_mp_apa_yacht_option3", offsetcoords=vector3(0,0,0),         offsetrotation=vector3(0,0,0)},
+        {handler=nil, objectname="as_apa_mp_apa_yacht_option3", offsetcoords=vector3(0,0,0),         offsetrotation=vector3(0,0,0)},
         
-        {handler=nil, objectname="rtx_apa_mp_apa_yacht_jacuzzi_ripple1", offsetcoords=vector3(0,-51,6), offsetrotation=vector3(0,0,0)},
+        {handler=nil, objectname="as_apa_mp_apa_yacht_jacuzzi_ripple1", offsetcoords=vector3(0,-51,6), offsetrotation=vector3(0,0,0)},
     },
 
     doors = {
@@ -444,118 +444,118 @@ local yachtBuyState = {
         {handler=nil, objectname="sf_p_mp_yacht_door",
          coords=vector3(-4.597,2.122,6.527), rotation=vector3(0,0,180), rotationopened=vector3(0,0,270), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-3.343,14.919,6.47), rotation=vector3(0,0,-160), rotationopened=vector3(0,0,-70), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-2.55,4.067,6.47), rotation=vector3(0,0,-160), rotationopened=vector3(0,0,-70), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-3.343,17.287,6.47), rotation=vector3(0,0,-160), rotationopened=vector3(0,0,-70), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_2",
+        {handler=nil, objectname="as_yacht_int_doors_2",
          coords=vector3(0.224,18.263,6.262), rotation=vector3(0,0,135), rotationopened=vector3(0,0,225), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-3.343,23.339,6.47), rotation=vector3(0,0,-160), rotationopened=vector3(0,0,-70), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_2",
+        {handler=nil, objectname="as_yacht_int_doors_2",
          coords=vector3(5.071,28.801,6.265), rotation=vector3(0,0,90), rotationopened=vector3(0,0,180), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-5.038,32.619,6.449), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(1.247,38.011,6.449), rotation=vector3(0,0,-160), rotationopened=vector3(0,0,-70), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(3.683,22.238,3.452), rotation=vector3(0,0,20), rotationopened=vector3(0,0,110), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(3.683,27.283,3.452), rotation=vector3(0,0,20), rotationopened=vector3(0,0,110), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(3.683,16.005,3.452), rotation=vector3(0,0,20), rotationopened=vector3(0,0,110), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-1.019,15.56,3.452), rotation=vector3(0,0,20), rotationopened=vector3(0,0,-70), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-1.019,21.732,3.452), rotation=vector3(0,0,20), rotationopened=vector3(0,0,-70), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-1.235,18.328,3.452), rotation=vector3(0,0,110), rotationopened=vector3(0,0,200), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-2.402,20.14,3.452), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-3.43,29.385,3.452), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,-160), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-6.51,29.385,3.452), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,-160), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-6.51,11.612,3.452), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20), opened=false},
         
-        {handler=nil, objectname="rtx_djn_apa_yacht_door_1",
+        {handler=nil, objectname="as_apa_yacht_door_1",
          coords=vector3(-5.508,5.174,9.624), rotation=vector3(0,0,90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_djn_apa_yacht_door_1",
+        {handler=nil, objectname="as_apa_yacht_door_1",
          coords=vector3(4.881,8.038,13.421), rotation=vector3(0,0,90), rotationopened=vector3(0,0,180), opened=false},
         
-        {handler=nil, objectname="rtx_djn_apa_yacht_door_1",
+        {handler=nil, objectname="as_apa_yacht_door_1",
          coords=vector3(-4.974,8.038,13.421), rotation=vector3(0,0,90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_djn_apa_yacht_door_1",
+        {handler=nil, objectname="as_apa_yacht_door_1",
          coords=vector3(5.427,5.174,9.624), rotation=vector3(0,0,90), rotationopened=vector3(0,0,180), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_1",
+        {handler=nil, objectname="as_yacht_int_doors_1",
          coords=vector3(-0.655,-18.873,6.459), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_2",
+        {handler=nil, objectname="as_yacht_int_doors_2",
          coords=vector3(0.943,6.236,6.262), rotation=vector3(0,0,135), rotationopened=vector3(0,0,225), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_doors_3",
+        {handler=nil, objectname="as_yacht_int_doors_3",
          coords=vector3(0.217,15.548,6.456), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_door_l",
+        {handler=nil, objectname="as_yacht_int_door_l",
          coords=vector3(-1.013,-27.255,9.546), rotation=vector3(0,0,180), rotationopened=vector3(0,0,270), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_door_r",
+        {handler=nil, objectname="as_yacht_int_door_r",
          coords=vector3(0.893,-27.255,9.546), rotation=vector3(0,0,0), rotationopened=vector3(0,0,-90), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_door_s",
+        {handler=nil, objectname="as_yacht_int_door_s",
          coords=vector3(5.312,-16.599,9.547), rotation=vector3(0,0,90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_gate_l",
+        {handler=nil, objectname="as_yacht_int_gate_l",
          coords=vector3(-0.049,-51.949,2.058), rotation=vector3(0,0,90), rotationopened=vector3(0,0,55), opened=false, special=true, opencoords=vector3(-0.049,-53.949,2.058)},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_gate_r",
+        {handler=nil, objectname="as_yacht_int_gate_r",
          coords=vector3(-0.049,-51.949,2.058), rotation=vector3(0,0,90), rotationopened=vector3(0,0,125), opened=false, special=true, opencoords=vector3(-0.049,-53.949,2.058)},
         
-        {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_cap",
+        {handler=nil, objectname="as_apa_mp_apa_yacht_door_cap",
          coords=vector3(-1.19,0.081,12.56), rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_cap",
+        {handler=nil, objectname="as_apa_mp_apa_yacht_door_cap",
          coords=vector3(1.138,0.081,12.56), rotation=vector3(0,0,90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_front",
+        {handler=nil, objectname="as_apa_mp_apa_yacht_door_front",
          coords=vector3(0.943,42.884,7.758), rotation=vector3(0,0,90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_front",
+        {handler=nil, objectname="as_apa_mp_apa_yacht_door_front",
          coords=vector3(-1.053,42.884,7.758), rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_door_saun",
+        {handler=nil, objectname="as_yacht_int_door_saun",
          coords=vector3(-4.115,3.033,3.548), rotation=vector3(0,0,90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_djn_yacht_int_door_saun",
+        {handler=nil, objectname="as_yacht_int_door_saun",
          coords=vector3(-5.047,3.966,3.548), rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0), opened=false},
         
-        {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_engine",
+        {handler=nil, objectname="as_apa_mp_apa_yacht_door_engine",
          coords=vector3(4.696,0.734,3.831), rotation=vector3(0,0,90), rotationopened=vector3(0,0,180), opened=false},
         
-        {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_engine",
+        {handler=nil, objectname="as_apa_mp_apa_yacht_door_engine",
          coords=vector3(2.805,0.734,3.831), rotation=vector3(0,0,-90), rotationopened=vector3(0,0,-180), opened=false},
     },
 
@@ -1057,7 +1057,7 @@ function YachtSpawnBuy(sessionId)
         -- a part that fails to load is skipped (already logged) instead of wiping the whole preview
         if objLoaded then
         local obj
-        if objData.objectname == "djn_apa_mp_apa_yacht_option3" then
+        if objData.objectname == "as_apa_mp_apa_yacht_option3" then
             
             obj = CreateVehicle(objHash,
                 previewCoords.x, previewCoords.y, previewCoords.z,
@@ -1414,67 +1414,67 @@ AddEventHandler("asyacht:Global:CreateYacht", function(
         },
 
         mainobjects = {
-            {handler=nil, objectname="djn_yacht_bar_details",               offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_bridge_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_engine_details_room_1",     offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_engine_details_room_2",     offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_engine_room_entry",         offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_int_wellness_rooms_details",offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_main_hall",                 offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_room1_details",             offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_room2_details",             offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yacht_room3_details",             offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_yachta_entry_room_details",       offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_bar_details",               offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_bridge_details",            offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_engine_details_room_1",     offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_engine_details_room_2",     offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_engine_room_entry",         offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_int_wellness_rooms_details",offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_main_hall",                 offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_room1_details",             offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_room2_details",             offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yacht_room3_details",             offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
+            {handler=nil, objectname="as_yachta_entry_room_details",       offsetcoords=vector3(-2.0496, 8.28e-4, 5.87994), offsetrotation=vector3(0,0,90)},
             {handler=nil, objectname="apa_prop_ap_stern_text",  offsetcoords=vector3(-2.0, -0.65, 17.1), offsetrotation=vector3(10,0,90)},
             {handler=nil, objectname="apa_prop_ap_starb_text",  offsetcoords=vector3(-2.05, 0.0, 5.8),   offsetrotation=vector3(0,0,90)},
             {handler=nil, objectname="apa_prop_ap_port_text",   offsetcoords=vector3(-2.05, 0.0, 5.8),   offsetrotation=vector3(0,0,90)},
             {handler=nil, objectname="apa_mp_apa_yacht_win",    offsetcoords=vector3(-2.05, 0.0, 5.9),   offsetrotation=vector3(0,0,90)},
-            {handler=nil, objectname="djn_apa_mp_apa_yacht_option3", offsetcoords=vector3(0,0,0), offsetrotation=vector3(0,0,0)},
-            {handler=nil, objectname="rtx_apa_mp_apa_yacht_jacuzzi_ripple1", offsetcoords=vector3(0,-51,6), offsetrotation=vector3(0,0,0)},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_option3", offsetcoords=vector3(0,0,0), offsetrotation=vector3(0,0,0)},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_jacuzzi_ripple1", offsetcoords=vector3(0,-51,6), offsetrotation=vector3(0,0,0)},
         },
 
         doors = {
             {handler=nil, objectname="apa_mp_apa_yacht_door",          coords=vector3(-0.769,-36.827,6.536), rotation=vector3(0,0,0),   rotationopened=vector3(0,0,90),   opened=false},
             {handler=nil, objectname="sf_p_mp_yacht_door",             coords=vector3(-4.803,-4.518,6.527),  rotation=vector3(0,0,180), rotationopened=vector3(0,0,270),  opened=false},
             {handler=nil, objectname="sf_p_mp_yacht_door",             coords=vector3(-4.597,2.122,6.527),   rotation=vector3(0,0,180), rotationopened=vector3(0,0,270),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-3.343,14.919,6.47),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-2.55,4.067,6.47),     rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-3.343,17.287,6.47),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_2",      coords=vector3(0.224,18.263,6.262),   rotation=vector3(0,0,135), rotationopened=vector3(0,0,225),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-3.343,23.339,6.47),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_2",      coords=vector3(5.071,28.801,6.265),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-5.038,32.619,6.449),  rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(1.247,38.011,6.449),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(3.683,22.238,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,110),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(3.683,27.283,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,110),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(3.683,16.005,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,110),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-1.019,15.56,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,-70),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-1.019,21.732,3.452),  rotation=vector3(0,0,20),  rotationopened=vector3(0,0,-70),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-1.235,18.328,3.452),  rotation=vector3(0,0,110), rotationopened=vector3(0,0,200),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-2.402,20.14,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-3.43,29.385,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,-160), opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-6.51,29.385,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,-160), opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-6.51,11.612,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
-            {handler=nil, objectname="rtx_djn_apa_yacht_door_1",       coords=vector3(-5.508,5.174,9.624),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_djn_apa_yacht_door_1",       coords=vector3(4.881,8.038,13.421),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
-            {handler=nil, objectname="rtx_djn_apa_yacht_door_1",       coords=vector3(-4.974,8.038,13.421),  rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_djn_apa_yacht_door_1",       coords=vector3(5.427,5.174,9.624),    rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_1",      coords=vector3(-0.655,-18.873,6.459), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_2",      coords=vector3(0.943,6.236,6.262),    rotation=vector3(0,0,135), rotationopened=vector3(0,0,225),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_doors_3",      coords=vector3(0.217,15.548,6.456),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_door_l",       coords=vector3(-1.013,-27.255,9.546), rotation=vector3(0,0,180), rotationopened=vector3(0,0,270),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_door_r",       coords=vector3(0.893,-27.255,9.546),  rotation=vector3(0,0,0),   rotationopened=vector3(0,0,-90),  opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_door_s",       coords=vector3(5.312,-16.599,9.547),  rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_gate_l",       coords=vector3(-0.049,-51.949,2.058), rotation=vector3(0,0,90),  rotationopened=vector3(0,0,55),   opened=false, special=true, opencoords=vector3(-0.049,-53.949,2.058)},
-            {handler=nil, objectname="rtx_djn_yacht_int_gate_r",       coords=vector3(-0.049,-51.949,2.058), rotation=vector3(0,0,90),  rotationopened=vector3(0,0,125),  opened=false, special=true, opencoords=vector3(-0.049,-53.949,2.058)},
-            {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_cap",  coords=vector3(-1.19,0.081,12.56),    rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_cap",  coords=vector3(1.138,0.081,12.56),    rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_front",coords=vector3(0.943,42.884,7.758),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_front",coords=vector3(-1.053,42.884,7.758),  rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_door_saun",    coords=vector3(-4.115,3.033,3.548),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_djn_yacht_int_door_saun",    coords=vector3(-5.047,3.966,3.548),   rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0),    opened=false},
-            {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_engine",coords=vector3(4.696,0.734,3.831),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
-            {handler=nil, objectname="rtx_apa_mp_apa_yacht_door_engine",coords=vector3(2.805,0.734,3.831),   rotation=vector3(0,0,-90), rotationopened=vector3(0,0,-180), opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-3.343,14.919,6.47),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-2.55,4.067,6.47),     rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-3.343,17.287,6.47),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_2",      coords=vector3(0.224,18.263,6.262),   rotation=vector3(0,0,135), rotationopened=vector3(0,0,225),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-3.343,23.339,6.47),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_2",      coords=vector3(5.071,28.801,6.265),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-5.038,32.619,6.449),  rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(1.247,38.011,6.449),   rotation=vector3(0,0,-160),rotationopened=vector3(0,0,-70),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(3.683,22.238,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,110),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(3.683,27.283,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,110),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(3.683,16.005,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,110),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-1.019,15.56,3.452),   rotation=vector3(0,0,20),  rotationopened=vector3(0,0,-70),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-1.019,21.732,3.452),  rotation=vector3(0,0,20),  rotationopened=vector3(0,0,-70),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-1.235,18.328,3.452),  rotation=vector3(0,0,110), rotationopened=vector3(0,0,200),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-2.402,20.14,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-3.43,29.385,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,-160), opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-6.51,29.385,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,-160), opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-6.51,11.612,3.452),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
+            {handler=nil, objectname="as_apa_yacht_door_1",       coords=vector3(-5.508,5.174,9.624),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_apa_yacht_door_1",       coords=vector3(4.881,8.038,13.421),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
+            {handler=nil, objectname="as_apa_yacht_door_1",       coords=vector3(-4.974,8.038,13.421),  rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_apa_yacht_door_1",       coords=vector3(5.427,5.174,9.624),    rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_1",      coords=vector3(-0.655,-18.873,6.459), rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_2",      coords=vector3(0.943,6.236,6.262),    rotation=vector3(0,0,135), rotationopened=vector3(0,0,225),  opened=false},
+            {handler=nil, objectname="as_yacht_int_doors_3",      coords=vector3(0.217,15.548,6.456),   rotation=vector3(0,0,-70), rotationopened=vector3(0,0,20),   opened=false},
+            {handler=nil, objectname="as_yacht_int_door_l",       coords=vector3(-1.013,-27.255,9.546), rotation=vector3(0,0,180), rotationopened=vector3(0,0,270),  opened=false},
+            {handler=nil, objectname="as_yacht_int_door_r",       coords=vector3(0.893,-27.255,9.546),  rotation=vector3(0,0,0),   rotationopened=vector3(0,0,-90),  opened=false},
+            {handler=nil, objectname="as_yacht_int_door_s",       coords=vector3(5.312,-16.599,9.547),  rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_yacht_int_gate_l",       coords=vector3(-0.049,-51.949,2.058), rotation=vector3(0,0,90),  rotationopened=vector3(0,0,55),   opened=false, special=true, opencoords=vector3(-0.049,-53.949,2.058)},
+            {handler=nil, objectname="as_yacht_int_gate_r",       coords=vector3(-0.049,-51.949,2.058), rotation=vector3(0,0,90),  rotationopened=vector3(0,0,125),  opened=false, special=true, opencoords=vector3(-0.049,-53.949,2.058)},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_door_cap",  coords=vector3(-1.19,0.081,12.56),    rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_door_cap",  coords=vector3(1.138,0.081,12.56),    rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_door_front",coords=vector3(0.943,42.884,7.758),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_door_front",coords=vector3(-1.053,42.884,7.758),  rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_yacht_int_door_saun",    coords=vector3(-4.115,3.033,3.548),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_yacht_int_door_saun",    coords=vector3(-5.047,3.966,3.548),   rotation=vector3(0,0,-90), rotationopened=vector3(0,0,0),    opened=false},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_door_engine",coords=vector3(4.696,0.734,3.831),   rotation=vector3(0,0,90),  rotationopened=vector3(0,0,180),  opened=false},
+            {handler=nil, objectname="as_apa_mp_apa_yacht_door_engine",coords=vector3(2.805,0.734,3.831),   rotation=vector3(0,0,-90), rotationopened=vector3(0,0,-180), opened=false},
         },
 
         hottubseats = {
@@ -1532,7 +1532,7 @@ function RefreshYachtAppearance(yachtId)
     if DoesEntityExist(yd.yachtmainobject) then paintVehicle(yd.yachtmainobject, colCfg.interior) end
     for _, objData in ipairs(yd.mainobjects) do
         if DoesEntityExist(objData.handler) then
-            if objData.objectname == "djn_apa_mp_apa_yacht_option3" then
+            if objData.objectname == "as_apa_mp_apa_yacht_option3" then
                 paintVehicle(objData.handler, colCfg.primary)
             else
                 SetObjectTextureVariant(objData.handler, colCfg.overlay)
@@ -2829,7 +2829,7 @@ Citizen.CreateThread(function()
                                 RequestModel(h)
                                 while not HasModelLoaded(h) do RequestModel(h) Citizen.Wait(5) end
                                 local obj
-                                if objData.objectname == "djn_apa_mp_apa_yacht_option3" then
+                                if objData.objectname == "as_apa_mp_apa_yacht_option3" then
                                     obj = CreateVehicle(h, sCoords.x, sCoords.y, sCoords.z, 0.0, false, true)
                                     SetVehicleDoorsLocked(obj, 9)
                                     FreezeEntityPosition(obj, true)
@@ -3089,7 +3089,7 @@ Citizen.CreateThread(function()
                                         RequestModel(h)
                                         while not HasModelLoaded(h) do RequestModel(h) Citizen.Wait(5) end
                                         local obj
-                                        if objData.objectname == "djn_apa_mp_apa_yacht_option3" then
+                                        if objData.objectname == "as_apa_mp_apa_yacht_option3" then
                                             local sc = vector3(stateCoords.x, stateCoords.y, stateCoords.z)
                                             obj = CreateVehicle(h, sc.x, sc.y, sc.z, 0.0, false, true)
                                             SetVehicleDoorsLocked(obj, 9)
@@ -3933,7 +3933,7 @@ RegisterNUICallback("buyyachtchangecolor", function(data, cb)
     for _, objData in ipairs(yachtBuyState.mainobjects) do
         if DoesEntityExist(objData.handler) then
             SetObjectTextureVariant(objData.handler, colCfg.overlay)
-            if objData.objectname == "djn_apa_mp_apa_yacht_option3" then
+            if objData.objectname == "as_apa_mp_apa_yacht_option3" then
                 SetVehicleModColor_1(objData.handler, 1, colCfg.primary, 0)
                 SetVehicleModColor_2(objData.handler, 1, colCfg.secondary)
                 SetVehicleColours(objData.handler, colCfg.primary, colCfg.secondary)
@@ -3984,7 +3984,7 @@ RegisterNUICallback("buyyachtchangerailing", function(data, cb)
     SetVehicleInteriorColor(yachtBuyState.yachtbuyobject, GetRailingColour(railingId))
 
     for _, objData in ipairs(yachtBuyState.mainobjects) do
-        if DoesEntityExist(objData.handler) and objData.objectname == "djn_apa_mp_apa_yacht_option3" then
+        if DoesEntityExist(objData.handler) and objData.objectname == "as_apa_mp_apa_yacht_option3" then
             SetVehicleInteriorColor(objData.handler, GetRailingColour(railingId))
         end
     end
