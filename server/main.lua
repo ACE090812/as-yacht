@@ -92,6 +92,48 @@ end
 
 YachtGetNearbyPlayers = function(src, dist) return getNearbyPlayers(src, dist) end
 
+-- Server-side events other resources can listen to:  AddEventHandler("asyacht:purchased", function(yachtId, owner, price, account) end)
+-- See README.md for the full list.
+function YachtEmit(name, ...)
+    TriggerEvent("asyacht:" .. name, ...)
+end
+
+-- Modules register a function(yacht, src) here; it returns a message when the yacht may not sail right now.
+YachtDriveChecks = {}
+function YachtDriveBlocked(yacht, src)
+    for _, check in ipairs(YachtDriveChecks) do
+        local msg = check(yacht, src)
+        if msg then return msg end
+    end
+    return nil
+end
+
+-- yachtId arrives from clients, so it can be anything. Returns an integer id, or -1 (never a valid
+-- yacht) so the usual  yachts["yacht-" .. yachtId]  lookup simply misses instead of erroring.
+function NormYachtId(v)
+    if type(v) == "string" then v = tonumber(v) end
+    if type(v) ~= "number" or v ~= v or v < 1 or v > 2147483647 or v ~= math.floor(v) then return -1 end
+    return math.tointeger(v) or -1
+end
+
+-- Per-player event throttle. Returns true when the call comes too soon after the previous one with this key.
+local rateBuckets = {}
+function YachtThrottled(src, key, ms)
+    local now = GetGameTimer()
+    local b = rateBuckets[src]
+    if not b then b = {}; rateBuckets[src] = b end
+    if b[key] and now - b[key] < ms then return true end
+    b[key] = now
+    return false
+end
+
+-- Copies a client supplied position into a clean vector3 (drops any extra fields a client may have sent).
+local function cleanVec(v)
+    return vector3(v.x + 0.0, v.y + 0.0, (v.z or 0) + 0.0)
+end
+
+local MAX_PERMISSIONS = 25
+
 local function playerOwnsYacht(identifier)
     for _, y in pairs(yachts) do
         if y.owner == identifier then return true end
@@ -188,6 +230,7 @@ function DefaultYachtExtras()
         insured = false, lastrecovery = 0,
         layouts = {}, lightmode = "on", radio = false, radioowned = false,
         hullowned = false, hullon = false, hullcolor = 1, tenders = {},
+        condition = 100.0, mood = false,
     }
 end
 
@@ -399,6 +442,7 @@ function CreateYachtRecord(owner, coords, rotation, o)
     yachts["yacht-" .. yachtId] = yacht
     RegisterYachtWorld(yachtId, coords, rotation)
     sendYachtToClients(-1, yacht)
+    YachtEmit("created", yachtId, owner)
     return yachtId
 end
 
@@ -501,6 +545,17 @@ local function getFurniturePrice(model)
     return furniturePriceByModel[model] or 0
 end
 
+GetFurniturePrice = getFurniturePrice
+
+-- Shop value of every non-free piece of furniture on the yacht.
+function GetFurnitureValue(yacht)
+    local total = 0
+    for _, f in pairs(yacht.furnitures) do
+        if not f.free then total = total + getFurniturePrice(f.furnituremodel) end
+    end
+    return total
+end
+
 function GetFurnitureRefund(yacht)
     local pct = Config.FurnitureRefundPercentage or 0
     if pct <= 0 then return 0 end
@@ -543,6 +598,7 @@ function RemoveYachtFully(yachtId)
     pendingFurnitureSave[yachtId] = nil
     RemoveYachtDatabase(yachtId)
     yachts["yacht-" .. yachtId] = nil
+    YachtEmit("removed", yachtId, yacht.owner)
     return true
 end
 
@@ -553,12 +609,14 @@ function DoTransferYacht(yachtId, newIdentifier)
     local oldSrc = GetSourceByIdentifier(yacht.owner)
     local newSrc = GetSourceByIdentifier(newIdentifier)
 
+    local previousOwner = yacht.owner
     yacht.permissions[newIdentifier] = nil
     yacht.owner = newIdentifier
     updateYachtOwner(yachtId, newIdentifier)
     updateYachtPermissions(yachtId, yacht.permissions)
     if newSrc then TriggerClientEvent("asyacht:Global:CreateYachtBlip", newSrc, yachtId) end
     if oldSrc then TriggerClientEvent("asyacht:Global:RemoveYachtBlip", oldSrc, yachtId) end
+    YachtEmit("transferred", yachtId, previousOwner, newIdentifier)
     return true
 end
 
@@ -678,9 +736,18 @@ if Config.DisableYachtDrive == false then
                     TriggerClientEvent("asyacht:Notify", playersource, Language[Config.Language].outoffuel, "error")
                     return
                 end
+                -- upkeep / hull condition can stop a yacht from sailing (defined in server/upkeep.lua and server/condition.lua)
+                if YachtDriveBlocked then
+                    local blocked = YachtDriveBlocked(yacht, playersource)
+                    if blocked then
+                        TriggerClientEvent("asyacht:Notify", playersource, blocked, "error")
+                        return
+                    end
+                end
                 if GlobalState["asyacht-" .. yachtId .. "-anchored"] == true then
                     if yacht.driverid == nil then
                         yacht.driverid = playersource
+                        YachtEmit("sailStarted", yachtId, playersource)
                         if Config.ServerNetworkYacht == false then
                             TriggerClientEvent("asyacht:Global:YachtClientMethod", playersource, yachtId)
                         end
@@ -739,6 +806,7 @@ if Config.DisableYachtDrive == false then
 
                             yacht.driverid = nil
                             yacht.driverleave = false
+                            YachtEmit("anchored", yachtId, yacht.yachtcurrentanchoreddata.coords)
 
                             SetEntityRotation(GlobalState["asyacht-" .. yachtId .. "-vehhandler"], 0.0, 0.0, finalRot.z)
                             SetEntityCoords(GlobalState["asyacht-" .. yachtId .. "-vehhandler"], finalCoords.x, finalCoords.y, -4.0)
@@ -777,6 +845,7 @@ if Config.DisableYachtDrive == false then
 
                             yacht.driverid = nil
                             yacht.driverleave = false
+                            YachtEmit("anchored", yachtId, yacht.yachtcurrentanchoreddata.coords)
                             GlobalState["asyacht-" .. yachtId .. "-vehhandler"] = nil
                             GlobalState["asyacht-" .. yachtId .. "-vehid"] = nil
 
@@ -792,6 +861,7 @@ if Config.DisableYachtDrive == false then
     RegisterServerEvent("asyacht:Global:EnterYacht")
     AddEventHandler("asyacht:Global:EnterYacht", function(yachtId)
         local src = source
+        yachtId = NormYachtId(yachtId)
         if yachtId ~= nil and yachts["yacht-" .. yachtId] and isPlayerNearYacht(src, yachtId) then
             if GlobalState["asyacht-" .. yachtId .. "-anchored"] == true then
                 if yachts["yacht-" .. yachtId].driverid == nil then
@@ -805,22 +875,29 @@ if Config.DisableYachtDrive == false then
         RegisterServerEvent("asyacht:Global:YachtClientMethodGet")
         AddEventHandler("asyacht:Global:YachtClientMethodGet", function(yachtId, netId)
             local src = source
-            if yachtId ~= nil and yachts["yacht-" .. yachtId] then
-                if yachts["yacht-" .. yachtId].driverid == src then
-                    GlobalState["asyacht-" .. yachtId .. "-vehid"] = netId
-                end
+            yachtId = NormYachtId(yachtId)
+            if yachtId ~= nil and yachts["yacht-" .. yachtId] and yachts["yacht-" .. yachtId].driverid == src then
+                if type(netId) ~= "number" or netId ~= math.floor(netId) or netId < 1 or netId > 65535 then return end
+                -- the entity may not have reached the server yet; when it has, it must be the yacht model
+                local ent = NetworkGetEntityFromNetworkId(netId)
+                if ent and ent ~= 0 and DoesEntityExist(ent) and GetEntityModel(ent) ~= GetHashKey("as_yacht_veh") then return end
+                GlobalState["asyacht-" .. yachtId .. "-vehid"] = netId
             end
         end)
 
         RegisterServerEvent("asyacht:Global:ExitYacht")
         AddEventHandler("asyacht:Global:ExitYacht", function(yachtId, finalCoords, finalRotation)
             local src = source
+            yachtId = NormYachtId(yachtId)
             if yachtId ~= nil and yachts["yacht-" .. yachtId] and isNum3(finalCoords) and isNum3(finalRotation) then
                 if math.abs(finalCoords.x) > 8000.0 or math.abs(finalCoords.y) > 8000.0 then return end
-                if not isPlayerNear(src, finalCoords, 400.0) then return end
+                if not isPlayerNear(src, finalCoords, 250.0) then return end
                 if GlobalState["asyacht-" .. yachtId .. "-anchored"] == false then
                     local yacht = yachts["yacht-" .. yachtId]
                     if yacht.driverid == src then
+                        -- the reported anchor point must match where the yacht was last seen sailing
+                        local lp = yacht.livepos
+                        if lp and (GetGameTimer() - lp.at) < 60000 and #(vector3(finalCoords.x, finalCoords.y, 0.0) - vector3(lp.coords.x, lp.coords.y, 0.0)) > 250.0 then return end
                         local blocked = GetAnchorBlockReason(yachtId, finalCoords)
                         if blocked and yacht.driverleave == false then
                             TriggerClientEvent("asyacht:Notify", src, blocked, "error")
@@ -846,6 +923,7 @@ if Config.DisableYachtDrive == false then
         RegisterServerEvent("asyacht:Global:ExitYacht")
         AddEventHandler("asyacht:Global:ExitYacht", function(yachtId)
             local src = source
+            yachtId = NormYachtId(yachtId)
             if yachtId ~= nil and yachts["yacht-" .. yachtId] then
                 if GlobalState["asyacht-" .. yachtId .. "-anchored"] == false then
                     local yacht = yachts["yacht-" .. yachtId]
@@ -876,13 +954,17 @@ end
 -- The driver's client reports the live position every few seconds (client-networked yachts),
 -- used by the autosave and when the driver disconnects mid-sail.
 RegisterServerEvent("asyacht:Global:DriveTick")
-AddEventHandler("asyacht:Global:DriveTick", function(yachtId, coords, rot)
+AddEventHandler("asyacht:Global:DriveTick", function(yachtId, coords, rot, sea)
     local src = source
+    yachtId = NormYachtId(yachtId)
     local yacht = yachts["yacht-" .. tostring(yachtId)]
     if not yacht or yacht.driverid ~= src or GlobalState["asyacht-" .. yacht.yachtid .. "-anchored"] ~= false then return end
     if not isNum3(coords) or not isNum3(rot) then return end
     if math.abs(coords.x) > 8000.0 or math.abs(coords.y) > 8000.0 then return end
-    if not isPlayerNear(src, coords, 400.0) then return end
+    if not isPlayerNear(src, coords, 250.0) then return end
+    if YachtThrottled(src, "drivetick", 1000) then return end
+    -- sea roughness (0-1) measured on the driver's client; only used for hull wear
+    yacht.seaRough = (type(sea) == "number" and sea == sea) and math.max(0.0, math.min(1.0, sea)) or 0.0
     yacht.livepos = {
         coords = vector3(coords.x, coords.y, -4.0),
         rotation = vector3(0.0, 0.0, rot.z),
@@ -894,6 +976,7 @@ end)
 RegisterServerEvent("asyacht:Global:SynchronizeYacht")
 AddEventHandler("asyacht:Global:SynchronizeYacht", function()
     local src = source
+    if YachtThrottled(src, "sync", 5000) then return end
 
     while not yachtsLoaded do
         Citizen.Wait(100)
@@ -1088,12 +1171,14 @@ if Config.DisableYachtBuy == false then
         end
         LogYacht("Yacht purchased", ("%s bought yacht #%s (%s %s) for $%s (%s)"):format(
             identifier, tostring(newId), textData.uppertext, textData.bottomtext, price, account))
+        if newId then YachtEmit("purchased", newId, identifier, price, account) end
     end)
 
     RegisterServerEvent("asyacht:Global:OpenYachtBuy")
     AddEventHandler("asyacht:Global:OpenYachtBuy", function()
         local src = source
         if not isPlayerNear(src, Config.YachtBuyLocation.coords, (Config.YachtBuyLocation.distance or 2.0) + 15.0) then return end
+        if YachtThrottled(src, "openbuy", 1500) then return end
         playersInBuyPreview[src] = true
         SetPlayerRoutingBucket(src, 1000 + src) -- offset avoids colliding with buckets used by other resources
         TriggerClientEvent("asyacht:Global:OpenYachtBuyClient", src)
@@ -1103,6 +1188,7 @@ if Config.DisableYachtBuy == false then
     RegisterServerEvent("asyacht:Global:CloseYachtBuy")
     AddEventHandler("asyacht:Global:CloseYachtBuy", function()
         local src = source
+        if not playersInBuyPreview[src] then return end -- never touch the routing bucket of someone who is not in the preview
         playersInBuyPreview[src] = nil
         SetPlayerRoutingBucket(src, 0)
         TriggerClientEvent("asyacht:Global:CloseYachtBuyMenu", src)
@@ -1112,9 +1198,11 @@ end
 RegisterServerEvent("asyacht:Global:OpenCloseDoor")
 AddEventHandler("asyacht:Global:OpenCloseDoor", function(yachtId, doorIndex)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local yacht = yachts["yacht-" .. yachtId]
-        local door = yacht.doors[doorIndex]
+        if not isPlayerNearYacht(src, yachtId) or YachtThrottled(src, "door", 400) then return end
+        local door = type(doorIndex) == "number" and yacht.doors[doorIndex]
         if door then
             local hasPerm = HasPlayerDoorPermission(yachtId, src)
             local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
@@ -1134,6 +1222,7 @@ end)
 RegisterServerEvent("asyacht:Global:CloseFurniture")
 AddEventHandler("asyacht:Global:CloseFurniture", function(yachtId)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local yacht = yachts["yacht-" .. yachtId]
         if yacht.furniture.decorating == true and yacht.furniture.decoratingid == src then
@@ -1147,11 +1236,12 @@ if Config.DisableYachtFurniture == false then
     RegisterServerEvent("asyacht:Global:OpenFurnitureShop")
     AddEventHandler("asyacht:Global:OpenFurnitureShop", function(yachtId)
         local src = source
+        yachtId = NormYachtId(yachtId)
         if yachtId ~= nil and yachts["yacht-" .. yachtId] then
             local yacht = yachts["yacht-" .. yachtId]
             local hasPerm = HasPlayerFurniturePermission(yachtId, src)
             local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
-            if hasPerm or isOwner then
+            if (hasPerm or isOwner) and isPlayerNearYacht(src, yachtId) then
                 if yacht.furniture.decorating == false then
                     yacht.furniture.decorating = true
                     yacht.furniture.decoratingid = src
@@ -1164,11 +1254,12 @@ if Config.DisableYachtFurniture == false then
     RegisterServerEvent("asyacht:Global:OpenFurnitureEdit")
     AddEventHandler("asyacht:Global:OpenFurnitureEdit", function(yachtId)
         local src = source
+        yachtId = NormYachtId(yachtId)
         if yachtId ~= nil and yachts["yacht-" .. yachtId] then
             local yacht = yachts["yacht-" .. yachtId]
             local hasPerm = HasPlayerFurniturePermission(yachtId, src)
             local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
-            if hasPerm or isOwner then
+            if (hasPerm or isOwner) and isPlayerNearYacht(src, yachtId) then
                 if yacht.furniture.decorating == false then
                     yacht.furniture.decorating = true
                     yacht.furniture.decoratingid = src
@@ -1182,6 +1273,7 @@ end
 RegisterServerEvent("asyacht:Global:OpenAddPermissionPlayer")
 AddEventHandler("asyacht:Global:OpenAddPermissionPlayer", function(yachtId, playersInArea)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
         if isOwner then
@@ -1200,9 +1292,15 @@ end)
 RegisterServerEvent("asyacht:Global:AddPermissionPlayer")
 AddEventHandler("asyacht:Global:AddPermissionPlayer", function(yachtId, targetPlayerId)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
         local okTarget, tId = isValidOnlinePlayer(targetPlayerId)
+        local permCount = 0
+        if isOwner then for _ in pairs(yachts["yacht-" .. yachtId].permissions) do permCount = permCount + 1 end end
+        if permCount >= MAX_PERMISSIONS then
+            return TriggerClientEvent("asyacht:Notify", src, LanguageFile("permissionlimit", MAX_PERMISSIONS), "error")
+        end
         if isOwner and okTarget and tId ~= src and isPlayerNear(tId, GetEntityCoords(GetPlayerPed(src)), 30.0) then
             targetPlayerId = tId
             local targetIdentifier = GetPlayerIdentifierYacht(targetPlayerId)
@@ -1229,6 +1327,7 @@ if Config.DisableYachtTransfer == false then
     RegisterServerEvent("asyacht:Global:OpenTransferYachtPlayer")
     AddEventHandler("asyacht:Global:OpenTransferYachtPlayer", function(yachtId, playersInArea)
         local src = source
+        yachtId = NormYachtId(yachtId)
         if yachtId ~= nil and yachts["yacht-" .. yachtId] then
             local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
             if isOwner then
@@ -1249,8 +1348,10 @@ if Config.DisableYachtTransfer == false then
     RegisterServerEvent("asyacht:Global:TransferPlayerYacht")
     AddEventHandler("asyacht:Global:TransferPlayerYacht", function(yachtId, targetPlayerId)
         local src = source
+        yachtId = NormYachtId(yachtId)
         if yachtId == nil or not yachts["yacht-" .. yachtId] then return end
-        if not IsPlayerYachtOwnerPermission(yachtId, src) then return end
+        if not IsPlayerYachtOwnerPermission(yachtId, src) or not isPlayerNearYacht(src, yachtId) then return end
+        if YachtThrottled(src, "transfer", 2000) then return end
 
         local okTarget, tId = isValidOnlinePlayer(targetPlayerId)
         local targetIdentifier = okTarget and GetPlayerIdentifierYacht(tId) or nil
@@ -1306,15 +1407,18 @@ if Config.DisableYachtSell == false then
     RegisterServerEvent("asyacht:Global:SellPlayerYacht")
     AddEventHandler("asyacht:Global:SellPlayerYacht", function(yachtId)
         local src = source
+        yachtId = NormYachtId(yachtId)
         if yachtId == nil or not yachts["yacht-" .. yachtId] then return end
-        if not IsPlayerYachtOwnerPermission(yachtId, src) then return end
+        if not IsPlayerYachtOwnerPermission(yachtId, src) or not isPlayerNearYacht(src, yachtId) then return end
 
         local yacht = yachts["yacht-" .. yachtId]
         if yacht.removeinprogress == false and yacht.driverid == nil then
             local sellPrice = math.floor(CalculateYachtPrice(yacht.lighting.lightingcategory, yacht.railing.railingid, 1) * (Config.YachtPriceSettings.redemptionpercentage / 100))
             local furnitureRefund = GetFurnitureRefund(yacht)
 
+            local ownerId = yacht.owner
             if RemoveYachtFully(yachtId) then
+                YachtEmit("sold", yachtId, ownerId, sellPrice + furnitureRefund)
                 AddMoneyYacht(src, sellPrice + furnitureRefund)
                 TriggerClientEvent("asyacht:Notify", src, LanguageFile("yachtsold", sellPrice))
                 if furnitureRefund > 0 then
@@ -1331,6 +1435,7 @@ end
 RegisterServerEvent("asyacht:Global:OpenManagment")
 AddEventHandler("asyacht:Global:OpenManagment", function(yachtId)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
         if isOwner then
@@ -1344,6 +1449,7 @@ end)
 RegisterServerEvent("asyacht:Global:OpenPermissions")
 AddEventHandler("asyacht:Global:OpenPermissions", function(yachtId)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
         if isOwner then
@@ -1355,17 +1461,18 @@ end)
 RegisterServerEvent("asyacht:Global:ChangePermissions")
 AddEventHandler("asyacht:Global:ChangePermissions", function(yachtId, targetIdentifier, yachtcontrol, dooraccess, furnituremanagment, storageaccess, wardrobeaccess)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
         if isOwner then
             local yacht = yachts["yacht-" .. yachtId]
             local targetPerm = yacht.permissions[tostring(targetIdentifier)]
-            if targetPerm ~= nil then
-                targetPerm.yachtcontrol = yachtcontrol
-                targetPerm.dooraccess = dooraccess
-                targetPerm.furnituremanagment = furnituremanagment
-                targetPerm.storageaccess = storageaccess
-                targetPerm.wardrobeaccess = wardrobeaccess
+            if targetPerm ~= nil and not YachtThrottled(src, "perm", 300) then
+                targetPerm.yachtcontrol = yachtcontrol == true
+                targetPerm.dooraccess = dooraccess == true
+                targetPerm.furnituremanagment = furnituremanagment == true
+                targetPerm.storageaccess = storageaccess == true
+                targetPerm.wardrobeaccess = wardrobeaccess == true
                 TriggerClientEvent("asyacht:Notify", src, Language[Config.Language].permissionschanged)
                 updateYachtPermissions(yachtId, yacht.permissions)
             end
@@ -1376,6 +1483,7 @@ end)
 RegisterServerEvent("asyacht:Global:DeletePermissions")
 AddEventHandler("asyacht:Global:DeletePermissions", function(yachtId, targetIdentifier)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
         if isOwner then
@@ -1394,24 +1502,27 @@ end)
 RegisterServerEvent("asyacht:Global:BuyFurniture")
 AddEventHandler("asyacht:Global:BuyFurniture", function(yachtId, categoryId, furnitureId, relCoords, relRot)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local yacht = yachts["yacht-" .. yachtId]
         if yacht.furniture.decorating == true and yacht.furniture.decoratingid == src then
             local hasPerm = HasPlayerFurniturePermission(yachtId, src)
             local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
-            if hasPerm or isOwner then
+            if (hasPerm or isOwner) and isPlayerNearYacht(src, yachtId) and not YachtThrottled(src, "furnbuy", 300) then
                 local category = Config.Furnitures[categoryId]
                 local itemData = category and category.categoryobjects and category.categoryobjects[furnitureId]
                 if not itemData or not validOffset(relCoords) or not validRot(relRot) then return end
                 local count = 0
                 for _ in pairs(yacht.furnitures) do count = count + 1 end
                 if count >= Limits.maxFurniturePerYacht then return end
+                relCoords, relRot = cleanVec(relCoords), cleanVec(relRot)
                 local price = itemData.furnitureprice
                 local playerMoney = GetMoneyYacht(src)
 
                 if playerMoney >= price then
                     RemoveMoneyYacht(src, price)
                     TriggerClientEvent("asyacht:Notify", src, LanguageFile("furniturebought", price))
+                    TriggerClientEvent("asyacht:Global:FurniturePurchased", src, itemData.furnitureobject, price)
                     local uniqueFId = GetUniqueFurnitureId(yachtId)
 
                     yacht.furnitures[uniqueFId] = {
@@ -1433,14 +1544,17 @@ end)
 RegisterServerEvent("asyacht:Global:SaveFurniture")
 AddEventHandler("asyacht:Global:SaveFurniture", function(yachtId, furnitureKey, relCoords, relRot)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local yacht = yachts["yacht-" .. yachtId]
         if yacht.furniture.decorating == true and yacht.furniture.decoratingid == src then
             local hasPerm = HasPlayerFurniturePermission(yachtId, src)
             local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
-            if hasPerm or isOwner then
-                local fObj = yacht.furnitures[tostring(furnitureKey)]
+            if (hasPerm or isOwner) and isPlayerNearYacht(src, yachtId) and not YachtThrottled(src, "furnsave", 120) then
+                furnitureKey = tostring(furnitureKey)
+                local fObj = yacht.furnitures[furnitureKey]
                 if fObj and validOffset(relCoords) and validRot(relRot) then
+                    relCoords, relRot = cleanVec(relCoords), cleanVec(relRot)
                     fObj.furniturecoords = relCoords
                     fObj.furniturerotation = relRot
                     TriggerClientEvent("asyacht:Global:UpdateFurniture", -1, yachtId, furnitureKey, relCoords, relRot)
@@ -1454,12 +1568,13 @@ end)
 RegisterServerEvent("asyacht:Global:RemoveFurniture")
 AddEventHandler("asyacht:Global:RemoveFurniture", function(yachtId, furnitureKey)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local yacht = yachts["yacht-" .. yachtId]
         if yacht.furniture.decorating == true and yacht.furniture.decoratingid == src then
             local hasPerm = HasPlayerFurniturePermission(yachtId, src)
             local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
-            if hasPerm or isOwner then
+            if (hasPerm or isOwner) and isPlayerNearYacht(src, yachtId) and not YachtThrottled(src, "furnrem", 150) then
                 if yacht.furnitures[tostring(furnitureKey)] ~= nil then
                     yacht.furnitures[tostring(furnitureKey)] = nil
                     TriggerClientEvent("asyacht:Global:RemoveFurnitureObject", -1, yachtId, furnitureKey)
@@ -1473,6 +1588,7 @@ end)
 RegisterServerEvent("asyacht:Global:OpenStorage")
 AddEventHandler("asyacht:Global:OpenStorage", function(yachtId, storageIndex)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local hasPerm = HasPlayerStoragePermission(yachtId, src)
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
@@ -1485,6 +1601,7 @@ end)
 RegisterServerEvent("asyacht:Global:OpenWardrobe")
 AddEventHandler("asyacht:Global:OpenWardrobe", function(yachtId, wardrobeIndex)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local hasPerm = HasPlayerWardrobePermission(yachtId, src)
         local isOwner = IsPlayerYachtOwnerPermission(yachtId, src)
@@ -1497,9 +1614,13 @@ end)
 RegisterServerEvent("asyacht:Global:UseHottub")
 AddEventHandler("asyacht:Global:UseHottub", function(yachtId, seatIndex)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
-        local seat = yachts["yacht-" .. yachtId].hottubseats[seatIndex]
-        if seat and seat.taken == false and seat.takenplayerid == nil and isPlayerNearYacht(src, yachtId) then
+        local yacht = yachts["yacht-" .. yachtId]
+        local seat = type(seatIndex) == "number" and yacht.hottubseats[seatIndex]
+        local alreadySeated = false
+        for _, other in pairs(yacht.hottubseats) do if other.takenplayerid == src then alreadySeated = true end end
+        if seat and not alreadySeated and seat.taken == false and seat.takenplayerid == nil and isPlayerNearYacht(src, yachtId) and not YachtThrottled(src, "hottub", 500) then
             seat.taken = true
             seat.takenplayerid = src
             TriggerClientEvent("asyacht:Global:SeatUseClient", -1, yachtId, seatIndex, true, src)
@@ -1511,6 +1632,7 @@ end)
 RegisterServerEvent("asyacht:Global:LeaveHottub")
 AddEventHandler("asyacht:Global:LeaveHottub", function(yachtId, seatIndex)
     local src = source
+    yachtId = NormYachtId(yachtId)
     if yachtId ~= nil and yachts["yacht-" .. yachtId] then
         local seat = yachts["yacht-" .. yachtId].hottubseats[seatIndex]
         if seat and seat.taken == true and seat.takenplayerid == src then
@@ -1525,6 +1647,7 @@ end)
 AddEventHandler("playerDropped", function()
     local src = source
     playersInBuyPreview[src] = nil
+    rateBuckets[src] = nil
     for _, yacht in pairs(yachts) do
         if yacht.driverid == src then
             -- anchor where the driver last reported instead of snapping back to the old anchor point

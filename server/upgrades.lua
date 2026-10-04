@@ -47,6 +47,7 @@ local function ownedYachtFor(src, yachtId)
     if not yacht then return nil end
     if not IsPlayerYachtOwnerPermission(yachtId, src) then return nil end
     if not YachtIsNearYacht(src, yachtId) then return nil end
+    if YachtThrottled(src, "upgrade", 250) then return nil end
     return yacht
 end
 
@@ -100,6 +101,11 @@ local function BuildUpgradesPayload(src, yacht)
             command = Config.Insurance.command,
         } or nil,
         comfort = BuildComfortPayload and BuildComfortPayload(yacht) or nil,
+        upkeep = GetUpkeepInfo and GetUpkeepInfo(yacht) or nil,
+        condition = Config.Condition and Config.Condition.enabled and GetYachtCondition and {
+            value = GetYachtCondition(yacht), repairprice = GetRepairPrice(yacht, 0),
+            insureddiscount = yacht.extras.insured and Config.Condition.insuredDiscount or 0,
+        } or nil,
         rental = Config.Rental.enabled and {
             maxminutes = Config.Rental.maxMinutes, maxprice = Config.Rental.maxPrice,
             nearby = nearby,

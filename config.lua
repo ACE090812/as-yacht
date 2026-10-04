@@ -404,6 +404,86 @@ Config.Rental = {
 }
 
 
+-- ─── Upkeep ────────────────────────────────────────────────────────────────
+-- A recurring berth / crew fee. Runs on real time, so it also counts while the owner is offline.
+-- The first period of a new yacht is free. Pay from the Upgrades screen or at a harbour master.
+Config.Upkeep = {
+	enabled = true,
+	intervalDays = 7,          -- real days covered by one payment
+	baseCost = 25000,          -- fee per period
+	furniturePercent = 0.5,    -- plus this % of the shop value of the furniture on board
+	marinaDiscount = 25,       -- % off while the yacht is moored inside a marina (Config.Marinas)
+	account = "bank",          -- account charged first ("bank" / "cash"); the other one is the fallback
+	autoPay = true,            -- take the fee automatically when it falls due while the owner is online
+	graceDays = 3,             -- days after the due date before the yacht is locked
+	onDefault = "lock",        -- "lock" = the yacht cannot sail until paid, "repossess" = it is removed (no refund)
+	repossessDays = 0,         -- with onDefault = "repossess": days overdue before removal (0 = never)
+	warnHours = 24,            -- remind the owner this long before the due date
+}
+
+-- ─── Marinas and harbour masters ───────────────────────────────────────────
+-- A harbour master (NPC) lets players pay upkeep, refuel and repair. Refuelling and repairs need the yacht
+-- to be moored inside the marina radius; paying upkeep works from the harbour master anywhere.
+-- Fuel and fees: fee is charged when anchoring inside the radius (needs Config.Docking.enabled = true).
+-- !! Coordinates are close approximations - stand where you want the NPC, run /yachtoffset or use your own
+-- !! coordinate tool, and adjust. They only matter once enabled = true.
+Config.Marinas = {
+	enabled = true,
+	key = 38,                       -- E: talk to the harbour master
+	pedModel = "s_m_y_dockwork_01",
+	blip = { sprite = 410, colour = 3, scale = 0.8 },
+	list = {
+		{
+			label = "Puerto Del Sol Marina",
+			zone = vector3(-775.0, -1420.0, 0.0), radius = 220.0,       -- yacht counts as moored inside this circle
+			harbour = vector4(-738.25, -1332.50, 1.6, 230.0),             -- NPC position + heading
+			fee = 25000, fuel = true, repair = true,
+		},
+		{
+			label = "Paleto Bay Docks",
+			zone = vector3(-300.0, 6680.0, 0.0), radius = 220.0,
+			harbour = vector4(-277.46, 6637.0, 7.5, 135.0),
+			fee = 15000, fuel = true, repair = true,
+		},
+	},
+}
+
+-- ─── Sea state ─────────────────────────────────────────────────────────────
+-- Rough weather slows the yacht, causes hull wear and shows a storm warning while sailing.
+-- Weather is read on the driver's client (works with any weather sync resource). CalmWater turns this off.
+Config.SeaState = {
+	enabled = true,
+	maxSlowdown = 0.30,        -- fraction of engine power lost in the worst weather (0.30 = -30%)
+	stormThreshold = 0.70,     -- roughness at which the storm warning shows
+	warnCooldown = 180,        -- seconds between storm warnings
+	weather = {                -- roughness 0.0 (flat) - 1.0 (storm) per GTA weather type
+		EXTRASUNNY = 0.0, CLEAR = 0.0, CLEARING = 0.15, CLOUDS = 0.15, SMOG = 0.1, FOGGY = 0.1,
+		OVERCAST = 0.3, RAIN = 0.55, THUNDER = 1.0, SNOW = 0.5, BLIZZARD = 0.9, SNOWLIGHT = 0.35,
+		XMAS = 0.4, NEUTRAL = 0.0, HALLOWEEN = 0.6,
+	},
+}
+
+-- ─── Hull condition ────────────────────────────────────────────────────────
+-- Condition runs 0-100. It drops from collisions and slowly while sailing (faster in storms), and is
+-- restored in the Upgrades screen or at a harbour master.
+Config.Condition = {
+	enabled = true,
+	wearPerKm = 0.12,          -- condition lost per kilometre sailed in calm weather
+	stormWearMultiplier = 3.0, -- wear multiplier at full roughness
+	impactMinSpeed = 5.0,      -- m/s: slower collisions do nothing
+	impactDamagePerSpeed = 1.4,-- condition lost per m/s above the minimum
+	impactMaxDamage = 18.0,    -- cap for a single collision
+	impactCooldown = 3,        -- seconds between two impacts being counted
+	performanceStart = 60,     -- below this condition the engine starts to lose power
+	minPower = 0.55,           -- engine power multiplier at 0% condition
+	fuelPenalty = 0.5,         -- extra fuel use at 0% condition (0.5 = +50%)
+	noSailBelow = 5,           -- the yacht cannot sail at or below this condition
+	repairPricePerPercent = 2500,
+	insuredDiscount = 40,      -- % off repairs for insured yachts
+	marinaDiscount = 20,       -- % off repairs at a harbour master
+}
+
+
 -- ═══════════════════════════════════════════════════════════════════════════
 --  8. COMFORT & EXTRAS
 --  Furniture layouts, light schedule, radio, hull lights and the boats / jet skis / helicopters.
@@ -415,6 +495,24 @@ Config.Comfort = {
 	-- Saved furniture layouts: a snapshot of where every piece sits. Loading one moves the
 	-- pieces the yacht already owns (matched by model); it never buys or refunds anything.
 	layouts = { enabled = true, max = 3 },
+
+	-- Saved layouts can be shared as a code (copy / paste between players). Importing only stores the layout;
+	-- every piece is checked against the furniture catalogue and the yacht limits on the server.
+	layoutSharing = { enabled = true, maxCodeLength = 16000 },
+
+	-- Moods: one click sets the light schedule, hull lights and radio. Hull lights / radio are only changed when the
+	-- yacht owns them. "auto" makes the hull lights follow the time of day (see moodSchedule).
+	moods = {
+		{ id = "chill",  label = "Chill",         lightMode = "auto", hull = { on = true,  color = 1 }, radio = "RADIO_13_JAZZ" },
+		{ id = "party",  label = "Party",         lightMode = "on",   hull = { on = true,  color = 4 }, radio = "RADIO_02_POP" },
+		{ id = "sunset", label = "Sunset",       lightMode = "on",   hull = { on = true,  color = 5 }, radio = false },
+		{ id = "quiet",  label = "Quiet night",  lightMode = "off",  hull = { on = false },            radio = false },
+		{ id = "auto",   label = "Follow the sun", lightMode = "auto", auto = true },
+	},
+	moodSchedule = {           -- used by the "auto" mood; hours are in-game hours, hull colour ids from hullLights.colors
+		{ from = 17, to = 20, color = 5 },   -- dusk: amber
+		{ from = 20, to = 6,  color = 3 },   -- night: purple
+	},
 
 	-- Day / night lighting: the light prop is shown always, only at night, or never.
 	lightModes = {

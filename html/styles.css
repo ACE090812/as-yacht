@@ -1155,11 +1155,11 @@ input:checked + .slider::before { left: 20px; }
 
 .up-note { font-size: 13px; color: var(--muted); align-self: center; }
 .fuel-bar { height: 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
-#up-fuel-fill { height: 100%; width: 0; background: linear-gradient(90deg, #34d399, var(--color)); border-radius: 6px; }
-#up-fuel-fill.low { background: linear-gradient(90deg, #f87171, #fbbf24); }
+#up-fuel-fill, #up-cond-fill, #hud-fuel-fill, #hud-hull-fill { height: 100%; width: 0; background: linear-gradient(90deg, #34d399, var(--color)); border-radius: 6px; }
+#up-fuel-fill.low, #fuel-hud.low #hud-fuel-fill, #hull-hud.low #hud-hull-fill { background: linear-gradient(90deg, #f87171, #fbbf24); }
 
 /* Fuel gauge while sailing (lives on <html>) */
-#fuel-hud {
+#fuel-hud, #hull-hud {
   position: fixed;
   left: 50%;
   bottom: 70px;
@@ -1177,10 +1177,37 @@ input:checked + .slider::before { left: 20px; }
   font-weight: 700;
   pointer-events: none;
 }
-#fuel-hud.show { display: flex; }
-#fuel-hud .fuel-bar { width: 140px; }
-#fuel-hud i { color: var(--color); }
-#fuel-hud.low i, #fuel-hud.low span { color: #ffb4b4; }
+#fuel-hud.show, #hull-hud.show { display: flex; }
+#fuel-hud .fuel-bar, #hull-hud .fuel-bar { width: 140px; }
+#fuel-hud i, #hull-hud i { color: var(--color); }
+#fuel-hud.low i, #fuel-hud.low span, #hull-hud.low i, #hull-hud.low span { color: #ffb4b4; }
+
+#hull-hud { bottom: 118px; }
+.share-code { width: 100%; min-height: 84px; resize: none; font-family: monospace; font-size: 11px; margin: 6px 0; word-break: break-all; }
+.layout-actions { display: flex; gap: 8px; margin-top: 6px; }
+.layout-actions span { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.8; cursor: pointer; padding: 2px 8px; border-radius: 8px; border: 1px solid var(--line); }
+.layout-actions span:hover { opacity: 1; }
+.up-note.warn { color: #ffd36a; }
+.up-note.bad { color: #ffb4b4; }
+#up-cond-fill.low { background: linear-gradient(90deg, #ff6b6b, #ff9d6b); }
+
+/* furniture shop */
+.shop-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.shop-toolbar .up-select { width: auto; min-width: 170px; }
+.shop-toolbar .chip { color: var(--text); }
+#up-layout-sharing { margin-top: 18px; }
+#up-layout-share { margin-top: 12px; }
+#up-layout-share .input-label { margin-bottom: 6px; }
+#up-share-copy { width: 100%; }
+.shop-session { font-size: 12px; font-weight: 700; color: var(--color); min-height: 0; }
+.shop-session:empty { display: none; }
+.cat-count { opacity: 0.55; font-weight: 600; margin-left: 4px; }
+.category-button.special { border-color: rgba(var(--color-rgb), 0.45); }
+.furniture-item { position: relative; }
+.fav-star { position: absolute; top: 12px; right: 12px; z-index: 2; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(0, 0, 0, 0.28); color: rgba(255, 255, 255, 0.55); font-size: 15px; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6); cursor: pointer; }
+.fav-star:hover { color: #fff; }
+.fav-star.on { color: #ffd36a; }
+.shop-empty { grid-column: 1 / -1; padding: 24px 4px; color: var(--muted); font-size: 13px; }
 
 /* comfort panel */
 .tier { position: relative; }

@@ -31,17 +31,37 @@ end
 -- ─── Fuel ───────────────────────────────────────────────────────────────────
 -- Called with the yacht's position every few seconds while it is sailing.
 function ConsumeFuel(yacht, coords, src)
-    local cfg = Config.Fuel
-    if not cfg or not cfg.enabled then return end
+    local cfg = Config.Fuel or {}
+    local fuelOn = cfg.enabled == true
+    local wearOn = Config.Condition and Config.Condition.enabled == true
+    if not fuelOn and not wearOn then return end
 
     local now = GetGameTimer()
     local last = yacht.fuelLast
     yacht.fuelLast = { x = coords.x, y = coords.y, at = now }
     if not last or (now - last.at) > 20000 then return end -- first tick of a trip
 
+    local distM = flatDistance(coords, last)
+    -- the driver rides the yacht, so their server-side position cannot be faked by under-reporting coords
+    if src then
+        local ped = GetPlayerPed(src)
+        if ped and ped ~= 0 then
+            local pc = GetEntityCoords(ped)
+            local lastPed = yacht.fuelLastPed
+            yacht.fuelLastPed = { x = pc.x, y = pc.y, at = now }
+            if lastPed and (now - lastPed.at) <= 20000 then
+                distM = math.max(distM, flatDistance(pc, lastPed))
+            end
+        end
+    end
+    local distKm = distM / 1000.0
+
+    if wearOn and ApplyHullWear then ApplyHullWear(yacht, distKm) end
+    if not fuelOn then return end
+
     local engine = Config.Upgrades.engine[yacht.extras.enginetier or 1]
     local mult = (engine and engine.fuelUse) or 1.0
-    local distKm = flatDistance(coords, last) / 1000.0
+    if GetConditionFuelMultiplier then mult = mult * GetConditionFuelMultiplier(yacht) end
     local minutes = (now - last.at) / 60000.0
     local used = (distKm * (cfg.usagePerKm or 1.5) + minutes * (cfg.idleUsagePerMin or 0.1)) * mult
 
@@ -78,10 +98,17 @@ AddEventHandler("asyacht:Global:RefuelYacht", function(yachtId)
     if not yacht then return end
     if not (IsPlayerYachtOwnerPermission(yachtId, src) or HasPlayerDrivePermission(yachtId, src)) then return end
     if not YachtIsNearYacht(src, yachtId) then return end
+    if YachtThrottled(src, "refuel", 1000) then return end
 
-    if cfg.requireStation and #(cfg.stations or {}) > 0 then
+    -- stations: the ones in Config.Fuel plus every marina that sells fuel
+    local stations = {}
+    for _, st in ipairs(cfg.stations or {}) do stations[#stations + 1] = st end
+    for _, m in ipairs((Config.Marinas and Config.Marinas.enabled and Config.Marinas.list) or {}) do
+        if m.fuel then stations[#stations + 1] = { coords = m.zone, radius = m.radius } end
+    end
+    if cfg.requireStation and #stations > 0 then
         local me, atStation = playerCoords(src), false
-        for _, st in ipairs(cfg.stations) do
+        for _, st in ipairs(stations) do
             if me and flatDistance(me, st.coords) <= st.radius then atStation = true end
         end
         if not atStation then
@@ -89,6 +116,11 @@ AddEventHandler("asyacht:Global:RefuelYacht", function(yachtId)
         end
     end
 
+    DoRefuelYacht(src, yacht)
+end)
+
+-- Charges for and fills the tank. Callers have already checked ownership and distance.
+function DoRefuelYacht(src, yacht)
     local price = refuelPrice(yacht)
     if price <= 0 then
         return TriggerClientEvent("asyacht:Notify", src, L("tankfull"), "info")
@@ -103,15 +135,21 @@ AddEventHandler("asyacht:Global:RefuelYacht", function(yachtId)
     if yacht.driverid then TriggerClientEvent("asyacht:Global:FuelUpdate", yacht.driverid, yacht.yachtid, 100.0) end
     TriggerClientEvent("asyacht:Notify", src, L("refueled", price), "success")
     LogYacht("Yacht refuelled", ("%s refuelled yacht #%s for $%s"):format(GetPlayerIdentifierYacht(src), yacht.yachtid, price))
+    YachtEmit("refuelled", yacht.yachtid, price)
     if SendYachtUpgrades then SendYachtUpgrades(src, yacht) end
-end)
+end
 
 -- ─── Docking fees ───────────────────────────────────────────────────────────
 -- Returns true when the yacht may anchor (fee paid or none due).
 function ChargeDockingFee(src, coords)
     local cfg = Config.Docking
     if not cfg or not cfg.enabled then return true end
-    for _, zone in ipairs(cfg.zones or {}) do
+    local zones = {}
+    for _, z in ipairs(cfg.zones or {}) do zones[#zones + 1] = z end
+    for _, m in ipairs((Config.Marinas and Config.Marinas.enabled and Config.Marinas.list) or {}) do
+        if (m.fee or 0) > 0 then zones[#zones + 1] = { label = m.label, coords = m.zone, radius = m.radius, fee = m.fee } end
+    end
+    for _, zone in ipairs(zones) do
         if flatDistance(coords, zone.coords) <= zone.radius then
             local fee = zone.fee or 0
             if fee > 0 then
@@ -252,7 +290,7 @@ AddEventHandler("asyacht:Global:OfferRental", function(yachtId, targetId, minute
     local cfg = Config.Rental
     if not cfg or not cfg.enabled then return end
     local yacht = findOwnedYacht(src, yachtId)
-    if not yacht or not YachtIsNearYacht(src, yacht.yachtid) then return end
+    if not yacht or not YachtIsNearYacht(src, yacht.yachtid) or YachtThrottled(src, "rentaloffer", 3000) then return end
 
     targetId = tonumber(targetId)
     minutes, price = tonumber(minutes), tonumber(price)
