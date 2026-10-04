@@ -41,7 +41,20 @@ function ConsumeFuel(yacht, coords, src)
 
     local engine = Config.Upgrades.engine[yacht.extras.enginetier or 1]
     local mult = (engine and engine.fuelUse) or 1.0
-    local distKm = flatDistance(coords, last) / 1000.0
+    local distM = flatDistance(coords, last)
+    -- the driver rides the yacht, so their server-side position cannot be faked by under-reporting coords
+    if src then
+        local ped = GetPlayerPed(src)
+        if ped and ped ~= 0 then
+            local pc = GetEntityCoords(ped)
+            local lastPed = yacht.fuelLastPed
+            yacht.fuelLastPed = { x = pc.x, y = pc.y, at = now }
+            if lastPed and (now - lastPed.at) <= 20000 then
+                distM = math.max(distM, flatDistance(pc, lastPed))
+            end
+        end
+    end
+    local distKm = distM / 1000.0
     local minutes = (now - last.at) / 60000.0
     local used = (distKm * (cfg.usagePerKm or 1.5) + minutes * (cfg.idleUsagePerMin or 0.1)) * mult
 
@@ -78,6 +91,7 @@ AddEventHandler("asyacht:Global:RefuelYacht", function(yachtId)
     if not yacht then return end
     if not (IsPlayerYachtOwnerPermission(yachtId, src) or HasPlayerDrivePermission(yachtId, src)) then return end
     if not YachtIsNearYacht(src, yachtId) then return end
+    if YachtThrottled(src, "refuel", 1000) then return end
 
     if cfg.requireStation and #(cfg.stations or {}) > 0 then
         local me, atStation = playerCoords(src), false
@@ -252,7 +266,7 @@ AddEventHandler("asyacht:Global:OfferRental", function(yachtId, targetId, minute
     local cfg = Config.Rental
     if not cfg or not cfg.enabled then return end
     local yacht = findOwnedYacht(src, yachtId)
-    if not yacht or not YachtIsNearYacht(src, yacht.yachtid) then return end
+    if not yacht or not YachtIsNearYacht(src, yacht.yachtid) or YachtThrottled(src, "rentaloffer", 3000) then return end
 
     targetId = tonumber(targetId)
     minutes, price = tonumber(minutes), tonumber(price)

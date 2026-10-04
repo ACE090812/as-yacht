@@ -15,6 +15,7 @@ server_scripts {
 	'@oxmysql/lib/MySQL.lua', 
 	'config.lua',
 	'language/main.lua',
+	'language/features.lua',
 	'language/translations.lua',
 	'server/main.lua',
 	'server/other.lua',
@@ -27,6 +28,7 @@ server_scripts {
 client_scripts {
 	'config.lua',
 	'language/main.lua',
+	'language/features.lua',
 	'language/translations.lua',
 	'client/core.lua',
 	'client/appearance.lua',

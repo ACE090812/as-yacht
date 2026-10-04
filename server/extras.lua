@@ -9,6 +9,7 @@ local function owned(src, yachtId)
     if not yacht then return nil end
     if not IsPlayerYachtOwnerPermission(yachtId, src) then return nil end
     if not YachtIsNearYacht(src, yachtId) then return nil end
+    if YachtThrottled(src, "extras", 250) then return nil end
     return yacht
 end
 
