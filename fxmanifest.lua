@@ -28,7 +28,20 @@ client_scripts {
 	'config.lua',
 	'language/main.lua',
 	'language/translations.lua',
-	'client/main.lua',
+	'client/core.lua',
+	'client/appearance.lua',
+	'client/buypreview.lua',
+	'client/blips.lua',
+	'client/init.lua',
+	'client/events.lua',
+	'client/buymenu.lua',
+	'client/sailing.lua',
+	'client/threads.lua',
+	'client/nui.lua',
+	'client/actions.lua',
+	'client/manage.lua',
+	'client/furniture.lua',
+	'client/comfort.lua',
 	'client/other.lua'
 }
 
