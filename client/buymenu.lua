@@ -234,11 +234,7 @@ AddEventHandler("asyacht:Global:SpawnPlayerOnYacht", function(yachtId)
             spawnOffset.y * cosZ + spawnOffset.x * sinZ + yachtCoords.y,
             spawnOffset.z + yachtCoords.z + 0.5)
 
-        local playerPed = PlayerPedId()
-        FreezeEntityPosition(playerPed, true)
-        SetEntityCoordsNoOffset(playerPed, spawnPos.x, spawnPos.y, spawnPos.z)
-        Citizen.Wait(100)
-        FreezeEntityPosition(playerPed, false)
+        PlacePedSafely(spawnPos)
 
         yachtRot    = GetEntityRotation(yachtData.yachtmainobject, 2)
         yachtCoords = GetEntityCoords(yachtData.yachtmainobject)

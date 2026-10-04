@@ -36,7 +36,7 @@ Everything is configured in `config.lua`; each system can be switched off with `
 | System | What it does | Config |
 | --- | --- | --- |
 | Buy, sail, anchor, sell, transfer | Core yacht ownership with permissions and rentals | sections 1-6 |
-| Furniture | Shop (search across categories, sort, favourites, recently bought), placement editor, layouts | `Config.Furnitures`, `Config.Comfort.layouts` |
+| Furniture | Shop (search across categories, sort, favourites, recently bought), placement editor with move steps from 5 mm to 1 m, layouts | `Config.Furnitures`, `Config.Comfort.layouts` |
 | Layout sharing | Export a saved layout as a code and import one from another player. Imports are validated on the server against the catalogue and yacht limits. Missing pieces can be bought in one click | `Config.Comfort.layoutSharing` |
 | Upkeep | Recurring berth/crew fee on real time (works offline). Overdue yachts lock, or optionally get repossessed | `Config.Upkeep` |
 | Marinas | Harbour master NPCs to pay upkeep, refuel and repair. Mooring discounts, optional docking fees, map blips | `Config.Marinas`, `Config.Docking` |

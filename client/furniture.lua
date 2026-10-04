@@ -169,12 +169,13 @@ RegisterNUICallback("yachtfurnitureclose", function(data, cb)
     ToggleNoClipFurniture(false)
 
     local ped = PlayerPedId()
-    FreezeEntityPosition(ped, true)
     if playerPositionBeforeFurniture then
-        SetEntityCoordsNoOffset(ped, playerPositionBeforeFurniture)
+        PlacePedSafely(playerPositionBeforeFurniture)
+    else
+        FreezeEntityPosition(ped, true)
+        Citizen.Wait(100)
+        FreezeEntityPosition(ped, false)
     end
-    Citizen.Wait(100)
-    FreezeEntityPosition(ped, false)
     SetFocusEntity(ped)
 
     cb(1)
@@ -221,12 +222,13 @@ RegisterNUICallback("yachtfurnitureeditclose", function(data, cb)
     ToggleNoClipFurniture(false)
 
     local ped = PlayerPedId()
-    FreezeEntityPosition(ped, true)
     if playerPositionBeforeFurniture then
-        SetEntityCoordsNoOffset(ped, playerPositionBeforeFurniture)
+        PlacePedSafely(playerPositionBeforeFurniture)
+    else
+        FreezeEntityPosition(ped, true)
+        Citizen.Wait(100)
+        FreezeEntityPosition(ped, false)
     end
-    Citizen.Wait(100)
-    FreezeEntityPosition(ped, false)
     SetFocusEntity(ped)
 
     cb(1)

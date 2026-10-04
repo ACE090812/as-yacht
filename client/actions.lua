@@ -42,7 +42,7 @@ RegisterNUICallback("editfurniture", function(data, cb)
         SendNUIMessage({action="SetRotationSnap",   data={rotationsnapdata  = furnitureRotateSnaps[furnitureRotateSnapIndex].snapdata}})
         SendNUIMessage({action="SetGizmoTransformMode", data={transformhandler=false}})
         SendNUIMessage({action="SetSpaceMode",          data={spacehandler=false}})
-        SendNUIMessage({message = "objecteditorownposshow"})
+        SendNUIMessage({message = "objecteditorownposshow", translatesnap = furnitureTranslateSnapIndex, translatesteps = FurnitureSnapSteps(), rotatesnap = furnitureRotateSnapIndex})
 
         if DoesEntityExist(furniturePlacementEntity) then
             GizmoStart(furniturePlacementEntity)
@@ -172,7 +172,7 @@ RegisterNUICallback("addnewfurnituretohouse", function(data, cb)
     SendNUIMessage({action="SetRotationSnap",        data={rotationsnapdata  = furnitureRotateSnaps[furnitureRotateSnapIndex].snapdata}})
     SendNUIMessage({action="SetGizmoTransformMode",  data={transformhandler=false}})
     SendNUIMessage({action="SetSpaceMode",           data={spacehandler=false}})
-    SendNUIMessage({message = "objecteditorposshow"})
+    SendNUIMessage({message = "objecteditorposshow", translatesnap = furnitureTranslateSnapIndex, translatesteps = FurnitureSnapSteps(), rotatesnap = furnitureRotateSnapIndex})
 
     GizmoStart(obj)
     SetModelAsNoLongerNeeded(modelHash)

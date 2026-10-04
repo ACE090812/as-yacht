@@ -113,10 +113,18 @@ furnitureSpeedsCamera = {
     {speeddata = 1.5}, {speeddata = 1.6}, {speeddata = 1.7}, {speeddata = 1.8}, {speeddata = 1.9}
 }
 
+-- Move steps in metres. The fine end (5 mm - 5 cm) is for seating a monitor flush on a table or a vase on a shelf.
 furnitureTranslateSnaps = {
-    {snapdata = 0.1}, {snapdata = 0.2}, {snapdata = 0.3}, {snapdata = 0.4}, {snapdata = 0.5},
-    {snapdata = 0.6}, {snapdata = 0.7}, {snapdata = 0.8}, {snapdata = 0.9}, {snapdata = 1.0}
+    {snapdata = 0.005}, {snapdata = 0.01}, {snapdata = 0.02}, {snapdata = 0.03}, {snapdata = 0.05},
+    {snapdata = 0.1},   {snapdata = 0.2},  {snapdata = 0.25}, {snapdata = 0.5},  {snapdata = 1.0}
 }
+
+-- The step sizes in order, so the editor can label its slider with the real value.
+function FurnitureSnapSteps()
+    local steps = {}
+    for i, snap in ipairs(furnitureTranslateSnaps) do steps[i] = snap.snapdata end
+    return steps
+end
 
 furnitureRotateSnaps = {
     {snapdata = 0.1}, {snapdata = 0.2}, {snapdata = 0.3}, {snapdata = 0.4}, {snapdata = 0.5},
@@ -126,7 +134,7 @@ furnitureRotateSnaps = {
 furnitureLookXIndex = 10
 furnitureLookYIndex = 10
 furnitureSpeedIndex = 10
-furnitureTranslateSnapIndex = 1
+furnitureTranslateSnapIndex = 6 -- 0.1 m, the same default step as before
 furnitureRotateSnapIndex = 1
 
 hottubSeatInfo = {
@@ -134,6 +142,35 @@ hottubSeatInfo = {
     seatid  = seatiddata,
 }
 isPlayerSeated          = false
+
+-- Teleports the player onto the yacht and keeps them frozen until the collision under them has loaded. A player
+-- released too early falls through the deck into the sea. A short background check then puts them back if they
+-- still ended up below the deck (retries up to 3 times).
+function PlacePedSafely(pos)
+    local ped = PlayerPedId()
+    local function put()
+        FreezeEntityPosition(ped, true)
+        SetEntityCoordsNoOffset(ped, pos.x, pos.y, pos.z, false, false, false)
+        local waited = 0
+        RequestCollisionAtCoord(pos.x, pos.y, pos.z)
+        while not HasCollisionLoadedAroundEntity(ped) and waited < 3000 do
+            RequestCollisionAtCoord(pos.x, pos.y, pos.z)
+            Wait(50)
+            waited = waited + 50
+        end
+        Wait(100)
+        FreezeEntityPosition(ped, false)
+    end
+    put()
+    CreateThread(function()
+        for _ = 1, 3 do
+            Wait(800)
+            if not DoesEntityExist(ped) then return end
+            if GetEntityCoords(ped).z > pos.z - 4.0 then return end -- still on the deck
+            put()
+        end
+    end)
+end
 
 function InSomeMenu()
     return not (

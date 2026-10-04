@@ -195,7 +195,7 @@ AddEventHandler("asyacht:Global:YachFurnitureEditClick", function(furnitureKey)
         SendNUIMessage({action="SetRotationSnap",        data={rotationsnapdata  = furnitureRotateSnaps[furnitureRotateSnapIndex].snapdata}})
         SendNUIMessage({action="SetGizmoTransformMode",  data={transformhandler=false}})
         SendNUIMessage({action="SetSpaceMode",           data={spacehandler=false}})
-        SendNUIMessage({message = "objecteditorownposshow"})
+        SendNUIMessage({message = "objecteditorownposshow", translatesnap = furnitureTranslateSnapIndex, translatesteps = FurnitureSnapSteps(), rotatesnap = furnitureRotateSnapIndex})
 
         GizmoStart(furnitureEntry.handler)
     else

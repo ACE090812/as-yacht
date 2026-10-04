@@ -150,6 +150,18 @@ function openMain() {
     $("body").css("display", "block");
 }
 
+// Move-snap slider: shows the real step in metres / centimetres / millimetres. The values come from the game.
+let snapSteps = [0.005, 0.01, 0.02, 0.03, 0.05, 0.1, 0.2, 0.25, 0.5, 1.0];
+function formatSnap(m) {
+    if (m >= 1) return m + " m";
+    if (m >= 0.01) return Math.round(m * 100) + " cm";
+    return Math.round(m * 1000) + " mm";
+}
+function updateSnapLabel() {
+    const i = parseInt($("#translatesnapdata").val(), 10);
+    $("#translatesnaplabel").text(snapSteps[i - 1] !== undefined ? "(" + formatSnap(snapSteps[i - 1]) + ")" : "");
+}
+
 function objecteditorcreatorPrepareInterface() {
   let reformated1 = document.getElementById("cameraspeeddata");
   var value = (reformated1.value-reformated1.min)/(reformated1.max-reformated1.min)*100
@@ -188,6 +200,7 @@ document.getElementById("lookspeedydata").oninput = function() {
 document.getElementById("translatesnapdata").oninput = function() {
   var value = (this.value-this.min)/(this.max-this.min)*100
   this.style.background = sliderFill(value)
+  updateSnapLabel();
 };
 
 document.getElementById("rotationsnapdata").oninput = function() {
@@ -608,8 +621,10 @@ window.addEventListener('message', function (event) {
 		$("#cameraspeeddata").val(""); 
 		$("#lookspeedxdata").val(""); 
 		$("#lookspeedydata").val(""); 
-		$("#translatesnapdata").val(""); 
-		$("#rotationsnapdata").val(""); 
+		if (item.translatesteps) snapSteps = item.translatesteps;
+		$("#translatesnapdata").val(item.translatesnap || 6);
+		$("#rotationsnapdata").val(item.rotatesnap || 1);
+		updateSnapLabel();
 		objecteditorcreatorPrepareInterface();
 		$("#posmoretranslate").addClass("active");
 		$("#posmorerotation").removeClass("active");
@@ -625,8 +640,10 @@ window.addEventListener('message', function (event) {
 		$("#cameraspeeddata").val(""); 
 		$("#lookspeedxdata").val(""); 
 		$("#lookspeedydata").val(""); 
-		$("#translatesnapdata").val(""); 
-		$("#rotationsnapdata").val(""); 
+		if (item.translatesteps) snapSteps = item.translatesteps;
+		$("#translatesnapdata").val(item.translatesnap || 6);
+		$("#rotationsnapdata").val(item.rotatesnap || 1);
+		updateSnapLabel();
 		objecteditorcreatorPrepareInterface();
 		$("#posmoretranslate").addClass("active");
 		$("#posmorerotation").removeClass("active");
