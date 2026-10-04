@@ -2,6 +2,33 @@
 
 Buyable, sailable, furnishable yachts for FiveM (ESX / QBCore / standalone). Requires `ox_lib`, `oxmysql` and the `as-yachtmodels` resource.
 
+## Screenshots
+
+Rendered from the real NUI (`html/`) with sample data. In game the panels sit over the world.
+
+<table>
+<tr>
+<td align="center" width="33%"><img src="docs/img/management-menu.png" alt="Yacht management menu"><br><sub><b>Management menu</b><br>Sell, transfer, upgrades, furniture and access</sub></td>
+<td align="center" width="33%"><img src="docs/img/furniture-shop.png" alt="Furniture shop categories"><br><sub><b>Furniture shop</b><br>Search across every category, favourites, recently bought</sub></td>
+<td align="center" width="33%"><img src="docs/img/furniture-shop-category.png" alt="Furniture shop category view"><br><sub><b>Category view</b><br>Sort, star favourites, running total of this visit</sub></td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td align="center" width="50%"><img src="docs/img/upgrades-economy.png" alt="Engine, storage, upkeep, hull condition and fuel"><br><sub><b>Upgrades: economy</b><br>Engine and storage tiers, upkeep, hull condition, fuel, insurance</sub></td>
+<td align="center" width="50%"><img src="docs/img/upgrades-comfort.png" alt="Moods, lighting, radio and hull lights"><br><sub><b>Upgrades: comfort</b><br>Moods, light schedule, onboard radio, hull lights</sub></td>
+</tr>
+<tr>
+<td align="center" width="50%"><img src="docs/img/layout-sharing.png" alt="Layout sharing"><br><sub><b>Layout sharing</b><br>Share a layout as a code, import one, buy the missing pieces</sub></td>
+<td align="center" width="50%"><img src="docs/img/upgrades-appearance.png" alt="Name and appearance"><br><sub><b>Upgrades: name and appearance</b><br>Rename, hull colour, railing, flag and lights</sub></td>
+</tr>
+</table>
+
+<p align="center"><img src="docs/img/sailing-hud.png" alt="Fuel and hull gauges while sailing" width="480"><br><sub><b>Sailing gauges</b> (fuel and hull condition) shown on a plain backdrop</sub></p>
+
+The harbour master menu uses `ox_lib` context menus, so it is not shown here.
+
 ## Features
 
 Everything is configured in `config.lua`; each system can be switched off with `enabled = false`.

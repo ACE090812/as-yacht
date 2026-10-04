@@ -714,6 +714,7 @@ input:checked + .slider::before { left: 20px; }
 
 .furniture-item,
 .furnitureown-item {
+  min-width: 0;
   padding: 10px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.05);
@@ -735,7 +736,7 @@ input:checked + .slider::before { left: 20px; }
   background: linear-gradient(135deg, rgba(var(--color-rgb), 0.16), rgba(29, 110, 224, 0.2));
 }
 .furniture-name,
-.furnitureown-name { font-size: 14px; font-weight: 700; margin-top: 10px; }
+.furnitureown-name { font-size: 14px; font-weight: 700; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .furniture-price { font-size: 13px; font-weight: 700; color: var(--color); margin-top: 2px; }
 
 /* ── Object editor toolbar ─────────────────────────────────── */

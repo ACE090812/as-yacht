@@ -380,7 +380,7 @@ function shopCategoryButton(label, count, onClick, extraClass) {
 
 function shopItemCard(item) {
     const fav = shopFavs.indexOf(item.name) >= 0;
-    const $card = $("<button>").addClass("furniture-item").attr("data-name", item.name)
+    const $card = $("<button>").addClass("furniture-item").attr("data-name", item.name).attr("title", item.name)
         .html('<span class="fav-star' + (fav ? ' on' : '') + '" title="Favourite"><i class="fas fa-star"></i></span>' +
             '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.name) + '" onerror="this.src=\'img/default.webp\'">' +
             '<div class="furniture-name">' + escapeHtml(item.name) + '</div>' +
@@ -649,6 +649,7 @@ window.addEventListener('message', function (event) {
 		const furnitureItem = $("<button>")
 			.addClass("furnitureown-item")
 			.attr("data-id", item.furnitureid)
+			.attr("title", item.furnitureobjectname)
 			.html(`
 				<img src="${item.furnitureimage}" alt="${item.furnitureobjectname}" onerror="this.src='img/default.webp'">
 				<div class="furnitureown-name">${item.furnitureobjectname}</div>
