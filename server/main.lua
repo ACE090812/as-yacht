@@ -98,6 +98,16 @@ function YachtEmit(name, ...)
     TriggerEvent("asyacht:" .. name, ...)
 end
 
+-- Modules register a function(yacht, src) here; it returns a message when the yacht may not sail right now.
+YachtDriveChecks = {}
+function YachtDriveBlocked(yacht, src)
+    for _, check in ipairs(YachtDriveChecks) do
+        local msg = check(yacht, src)
+        if msg then return msg end
+    end
+    return nil
+end
+
 -- yachtId arrives from clients, so it can be anything. Returns an integer id, or -1 (never a valid
 -- yacht) so the usual  yachts["yacht-" .. yachtId]  lookup simply misses instead of erroring.
 function NormYachtId(v)
@@ -220,6 +230,7 @@ function DefaultYachtExtras()
         insured = false, lastrecovery = 0,
         layouts = {}, lightmode = "on", radio = false, radioowned = false,
         hullowned = false, hullon = false, hullcolor = 1, tenders = {},
+        condition = 100.0, mood = false,
     }
 end
 
@@ -532,6 +543,17 @@ local function getFurniturePrice(model)
         end
     end
     return furniturePriceByModel[model] or 0
+end
+
+GetFurniturePrice = getFurniturePrice
+
+-- Shop value of every non-free piece of furniture on the yacht.
+function GetFurnitureValue(yacht)
+    local total = 0
+    for _, f in pairs(yacht.furnitures) do
+        if not f.free then total = total + getFurniturePrice(f.furnituremodel) end
+    end
+    return total
 end
 
 function GetFurnitureRefund(yacht)
@@ -932,7 +954,7 @@ end
 -- The driver's client reports the live position every few seconds (client-networked yachts),
 -- used by the autosave and when the driver disconnects mid-sail.
 RegisterServerEvent("asyacht:Global:DriveTick")
-AddEventHandler("asyacht:Global:DriveTick", function(yachtId, coords, rot)
+AddEventHandler("asyacht:Global:DriveTick", function(yachtId, coords, rot, sea)
     local src = source
     yachtId = NormYachtId(yachtId)
     local yacht = yachts["yacht-" .. tostring(yachtId)]
@@ -941,6 +963,8 @@ AddEventHandler("asyacht:Global:DriveTick", function(yachtId, coords, rot)
     if math.abs(coords.x) > 8000.0 or math.abs(coords.y) > 8000.0 then return end
     if not isPlayerNear(src, coords, 250.0) then return end
     if YachtThrottled(src, "drivetick", 1000) then return end
+    -- sea roughness (0-1) measured on the driver's client; only used for hull wear
+    yacht.seaRough = (type(sea) == "number" and sea == sea) and math.max(0.0, math.min(1.0, sea)) or 0.0
     yacht.livepos = {
         coords = vector3(coords.x, coords.y, -4.0),
         rotation = vector3(0.0, 0.0, rot.z),

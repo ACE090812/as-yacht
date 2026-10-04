@@ -101,6 +101,11 @@ local function BuildUpgradesPayload(src, yacht)
             command = Config.Insurance.command,
         } or nil,
         comfort = BuildComfortPayload and BuildComfortPayload(yacht) or nil,
+        upkeep = GetUpkeepInfo and GetUpkeepInfo(yacht) or nil,
+        condition = Config.Condition and Config.Condition.enabled and GetYachtCondition and {
+            value = GetYachtCondition(yacht), repairprice = GetRepairPrice(yacht, 0),
+            insureddiscount = yacht.extras.insured and Config.Condition.insuredDiscount or 0,
+        } or nil,
         rental = Config.Rental.enabled and {
             maxminutes = Config.Rental.maxMinutes, maxprice = Config.Rental.maxPrice,
             nearby = nearby,

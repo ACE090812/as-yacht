@@ -194,6 +194,10 @@ exports("GetYachtData", function(yachtId)
         lighting = { category = y.lighting.lightingcategory, id = y.lighting.lightingid },
         text = { upper = y.textdata.uppertext, bottom = y.textdata.bottomtext },
         permissions = y.permissions,
+        fuel = y.extras.fuel,
+        insured = y.extras.insured == true,
+        condition = GetYachtCondition and GetYachtCondition(y) or nil,
+        upkeep = GetUpkeepInfo and GetUpkeepInfo(y) or nil,
     }
 end)
 

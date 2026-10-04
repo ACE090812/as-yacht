@@ -22,7 +22,12 @@ server_scripts {
 	'server/commands.lua',
 	'server/upgrades.lua',
 	'server/economy.lua',
-	'server/extras.lua'
+	'server/extras.lua',
+	'server/marina.lua',
+	'server/upkeep.lua',
+	'server/condition.lua',
+	'server/layouts.lua',
+	'server/api.lua'
 }
 
 client_scripts {
@@ -44,6 +49,8 @@ client_scripts {
 	'client/manage.lua',
 	'client/furniture.lua',
 	'client/comfort.lua',
+	'client/marina.lua',
+	'client/seastate.lua',
 	'client/other.lua'
 }
 

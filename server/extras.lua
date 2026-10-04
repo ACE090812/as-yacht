@@ -45,8 +45,12 @@ function BuildComfortPayload(yacht)
     for i, l in ipairs(ex.layouts or {}) do
         local n = 0
         for _ in pairs(l.items or {}) do n = n + 1 end
-        layouts[i] = { name = l.name, count = n }
+        local missing, cost = 0, 0
+        if LayoutMissing then missing, cost = LayoutMissing(yacht, l) end
+        layouts[i] = { name = l.name, count = n, missing = missing, missingcost = cost }
     end
+    local moods = {}
+    for _, m in ipairs(c.moods or {}) do moods[#moods + 1] = { id = m.id, label = m.label } end
     local tenders = {}
     for _, t in ipairs((c.tender and c.tender.options) or {}) do
         tenders[#tenders + 1] = { id = t.id, label = t.label, category = t.category or "Vehicles", price = t.price, owned = (ex.tenders or {})[tostring(t.id)] == true }
@@ -58,6 +62,8 @@ function BuildComfortPayload(yacht)
 
     return {
         layoutsEnabled = c.layouts and c.layouts.enabled == true, layoutsMax = c.layouts and c.layouts.max or 3, layouts = layouts,
+        sharing = c.layoutSharing and c.layoutSharing.enabled == true or false,
+        moods = moods, mood = ex.mood or false,
         lightmodes = c.lightModes, lightmode = ex.lightmode or "on",
         ambience = c.ambience and c.ambience.enabled and {
             price = c.ambience.price, owned = ex.radioowned == true, current = ex.radio or false, stations = stations,
@@ -117,7 +123,15 @@ AddEventHandler("asyacht:Global:LoadLayout", function(yachtId, index)
     if not layout then return end
     if yacht.furniture.decorating == true then return Notice(src, "layoutbusy") end
 
-    -- pieces already placed on the yacht, grouped by model
+    local moved, missing = ApplyYachtLayout(yacht, layout)
+    Notice(src, "layoutloaded", "success", layout.name, moved, missing)
+    LogYacht("Furniture layout loaded", ("%s loaded layout '%s' on yacht #%s (%s moved, %s missing)"):format(
+        GetPlayerIdentifierYacht(src), layout.name, yacht.yachtid, moved, missing))
+end)
+
+-- Moves the pieces the yacht already owns (matched by model) to the positions stored in a layout.
+-- Returns how many were moved and how many layout pieces had no matching piece.
+function ApplyYachtLayout(yacht, layout)
     local pool = {}
     for key, f in pairs(yacht.furnitures) do
         pool[f.furnituremodel] = pool[f.furnituremodel] or {}
@@ -138,10 +152,8 @@ AddEventHandler("asyacht:Global:LoadLayout", function(yachtId, index)
         end
     end
     updateYachtFurniture(yacht.yachtid, yacht.furnitures)
-    Notice(src, "layoutloaded", "success", layout.name, moved, missing)
-    LogYacht("Furniture layout loaded", ("%s loaded layout '%s' on yacht #%s (%s moved, %s missing)"):format(
-        GetPlayerIdentifierYacht(src), layout.name, yacht.yachtid, moved, missing))
-end)
+    return moved, missing
+end
 
 -- Light mode (free) -----------------------------------------------------------
 RegisterServerEvent("asyacht:Global:SetLightMode")
@@ -154,6 +166,7 @@ AddEventHandler("asyacht:Global:SetLightMode", function(yachtId, mode)
     for _, m in ipairs(C().lightModes or {}) do if m.id == mode then ok = true end end
     if not ok then return end
     yacht.extras.lightmode = mode
+    yacht.extras.mood = false
     Finish(src, yacht)
 end)
 
@@ -176,6 +189,7 @@ AddEventHandler("asyacht:Global:SetRadio", function(yachtId, stationId)
         yacht.extras.radioowned = true
     end
     yacht.extras.radio = (stationId ~= "" and stationId) or false
+    yacht.extras.mood = false
     Finish(src, yacht)
 end)
 
@@ -194,6 +208,40 @@ AddEventHandler("asyacht:Global:SetHullLights", function(yachtId, colorId, on)
     end
     yacht.extras.hullcolor = colorId
     yacht.extras.hullon = on == true
+    yacht.extras.mood = false
+    Finish(src, yacht)
+end)
+
+-- Moods -----------------------------------------------------------------------
+-- A mood sets the light schedule, hull lights and radio in one go (free). Hull lights and radio are only touched
+-- when the yacht already owns them. The "auto" mood is rendered on the clients (hull lights follow the time of day).
+RegisterServerEvent("asyacht:Global:SetMood")
+AddEventHandler("asyacht:Global:SetMood", function(yachtId, moodId)
+    local src = source
+    if not Enabled() or type(moodId) ~= "string" then return end
+    local yacht = owned(src, yachtId)
+    if not yacht then return end
+    local mood
+    for _, m in ipairs(C().moods or {}) do if m.id == moodId then mood = m end end
+    if not mood then return end
+
+    local ex = yacht.extras
+    ex.mood = mood.id
+    if mood.lightMode then
+        for _, m in ipairs(C().lightModes or {}) do if m.id == mood.lightMode then ex.lightmode = mood.lightMode end end
+    end
+    if mood.hull and ex.hullowned and C().hullLights then
+        ex.hullon = mood.hull.on == true
+        if mood.hull.color and C().hullLights.colors[mood.hull.color] then ex.hullcolor = mood.hull.color end
+    end
+    if mood.radio ~= nil and ex.radioowned and C().ambience then
+        if mood.radio == false then
+            ex.radio = false
+        else
+            for _, st in ipairs(C().ambience.stations or {}) do if st.id == mood.radio then ex.radio = mood.radio end end
+        end
+    end
+    Notice(src, "moodset", "success", mood.label)
     Finish(src, yacht)
 end)
 
