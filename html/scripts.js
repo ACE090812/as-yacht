@@ -324,33 +324,142 @@ const validateSelection = () => {
     return isValid;
 };
 
-function addFurnitureCategory(categoryId, categoryLabel) {
-    furnitureData[categoryId] = [];
-	furnitureNames[categoryId] = categoryLabel;
+// ── Furniture shop ─────────────────────────────────────────
+// State: shopCategory is null (category list), a category id, "__fav" or "__recent". A search query overrides it
+// and looks through every category. Favourites and recently bought pieces are remembered in localStorage.
+const furnitureOrder = [];
+const FAV_KEY = "asyacht_fav_furniture", RECENT_KEY = "asyacht_recent_furniture";
+let shopCategory = null, shopQuery = "", shopSort = "default", shopFavOnly = false, shopRenderTimer = null;
+let shopSession = { count: 0, total: 0 };
 
-    const newButton = $("<button>")
-        .addClass("category-button")
-        .attr("data-category", categoryId)
-        .html(`${categoryLabel}`) 
-        .click(function () {
-            const category = $(this).data("category");
-            showFurnitureList(category);
-        });
-    $("#furnitureCategories").append(newButton);
+function shopLoad(key) {
+    try { const v = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+}
+function shopSave(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ } }
+let shopFavs = shopLoad(FAV_KEY), shopRecent = shopLoad(RECENT_KEY);
+
+function escapeHtml(t) { return String(t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+function allShopItems() {
+    const out = [];
+    furnitureOrder.forEach(function (cat) { (furnitureData[cat] || []).forEach(function (it) { out.push(it); }); });
+    return out;
 }
 
+function scheduleShopRender() {
+    clearTimeout(shopRenderTimer);
+    shopRenderTimer = setTimeout(renderShop, 30);
+}
+
+function addFurnitureCategory(categoryId, categoryLabel) {
+    furnitureData[categoryId] = [];
+    furnitureNames[categoryId] = categoryLabel;
+    if (furnitureOrder.indexOf(categoryId) < 0) furnitureOrder.push(categoryId);
+    scheduleShopRender();
+}
 
 function addFurniture(categoryId, furnitureId, furnitureLabel, furniturePrice) {
     if (!furnitureData[categoryId]) {
         return;
     }
-	
     furnitureData[categoryId].push({
         id: furnitureId,
+        category: categoryId,
         name: furnitureLabel,
         price: furniturePrice,
-		image: 'img/objects/'+furnitureLabel+'.webp',
+        image: 'img/objects/' + furnitureLabel + '.webp',
     });
+    scheduleShopRender();
+}
+
+function shopCategoryButton(label, count, onClick, extraClass) {
+    return $("<button>").addClass("category-button " + (extraClass || ""))
+        .html(escapeHtml(label) + ' <small class="cat-count">' + count + '</small>')
+        .click(onClick);
+}
+
+function shopItemCard(item) {
+    const fav = shopFavs.indexOf(item.name) >= 0;
+    const $card = $("<button>").addClass("furniture-item").attr("data-name", item.name)
+        .html('<span class="fav-star' + (fav ? ' on' : '') + '" title="Favourite"><i class="fas fa-star"></i></span>' +
+            '<img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml(item.name) + '" onerror="this.src=\'img/default.webp\'">' +
+            '<div class="furniture-name">' + escapeHtml(item.name) + '</div>' +
+            '<div class="furniture-price">$' + escapeHtml(item.price) + '</div>');
+    $card.find(".fav-star").on("click", function (e) {
+        e.stopPropagation();
+        const i = shopFavs.indexOf(item.name);
+        if (i >= 0) shopFavs.splice(i, 1); else shopFavs.push(item.name);
+        shopSave(FAV_KEY, shopFavs);
+        $(this).toggleClass("on", i < 0);
+        playSound("click");
+        if (shopFavOnly || shopCategory === "__fav") renderShop();
+    });
+    $card.on("click", function () {
+        $(".buyobjecttextname").text(item.name);
+        $(".buyobjecttextprice").text('$' + item.price);
+        $.post('https://' + yachtresourcename + '/addnewfurnituretohouse', JSON.stringify({
+            furniturecategoryid: item.category,
+            furnitureid: item.id,
+        }));
+    });
+    return $card;
+}
+
+function sortShopItems(items) {
+    const list = items.slice();
+    if (shopSort === "price-asc") list.sort(function (a, b) { return a.price - b.price || a.name.localeCompare(b.name); });
+    else if (shopSort === "price-desc") list.sort(function (a, b) { return b.price - a.price || a.name.localeCompare(b.name); });
+    else if (shopSort === "name") list.sort(function (a, b) { return a.name.localeCompare(b.name); });
+    return list;
+}
+
+function renderShop() {
+    const q = shopQuery.trim().toLowerCase();
+    const all = allShopItems();
+    let items = null, title = "";
+
+    if (q) {
+        title = 'Results for "' + shopQuery.trim() + '"';
+        items = all.filter(function (it) {
+            return it.name.toLowerCase().indexOf(q) >= 0 || String(furnitureNames[it.category] || "").toLowerCase().indexOf(q) >= 0;
+        });
+    } else if (shopCategory === "__fav") {
+        title = "Favourites";
+        items = all.filter(function (it) { return shopFavs.indexOf(it.name) >= 0; });
+    } else if (shopCategory === "__recent") {
+        title = "Recently bought";
+        items = shopRecent.map(function (n) { return all.find(function (it) { return it.name === n; }); }).filter(Boolean);
+    } else if (shopCategory !== null && furnitureData[shopCategory]) {
+        title = furnitureNames[shopCategory];
+        items = furnitureData[shopCategory].slice();
+    }
+
+    $("#shopToolbar").toggle(items !== null);
+    $("#shopSession").text(shopSession.count > 0 ? "Bought this visit: " + shopSession.count + " · $" + shopSession.total : "");
+
+    if (items === null) {
+        const $c = $("#furnitureCategories").empty().show();
+        $("#furnitureList").hide();
+        shopCategoryButton("Favourites", shopFavs.length, function () { shopCategory = "__fav"; renderShop(); }, "special").prepend('<i class="fas fa-star"></i> ').appendTo($c);
+        shopCategoryButton("Recently bought", shopRecent.length, function () { shopCategory = "__recent"; renderShop(); }, "special").prepend('<i class="fas fa-clock-rotate-left"></i> ').appendTo($c);
+        furnitureOrder.forEach(function (cat) {
+            shopCategoryButton(furnitureNames[cat], (furnitureData[cat] || []).length, function () { showFurnitureList(cat); }).attr("data-category", cat).appendTo($c);
+        });
+        return;
+    }
+
+    if (shopFavOnly) items = items.filter(function (it) { return shopFavs.indexOf(it.name) >= 0; });
+    items = sortShopItems(items);
+
+    $("#furnitureCategories").hide();
+    $("#furnitureList").show();
+    $("#categoryName").text(title + " (" + items.length + ")");
+    const $grid = $("#furnitureItems").empty();
+    if (!items.length) {
+        $('<div class="shop-empty"></div>').text(shopCategory === "__fav" ? "Tap the star on a piece to add it here." : (shopCategory === "__recent" ? "Nothing bought yet." : "No pieces found.")).appendTo($grid);
+        return;
+    }
+    items.forEach(function (it) { $grid.append(shopItemCard(it)); });
 }
 
 function removeFurnitureItemById(furnitureId) {
@@ -468,12 +577,24 @@ window.addEventListener('message', function (event) {
 	}
 	
 	if (item.message == "yachtfurnitureshow") {
-		showCategories();
+		shopCategory = null; shopQuery = ""; shopFavOnly = false; shopSession = { count: 0, total: 0 };
+		furnitureOrder.length = 0;
+		Object.keys(furnitureData).forEach(function (k) { delete furnitureData[k]; delete furnitureNames[k]; });
+		$("#searchInput").val(""); $("#shopFavOnly").removeClass("selected");
 		infurnituremenu = 1;
 		$("#furnitureCategories").empty();
 		$("#furnitureItems").empty();
+		renderShop();
 		openMain();
 		$("#furnitureMenu").show();
+	}
+
+	if (item.message == "furniturepurchased") {
+		shopSession.count += 1;
+		shopSession.total += Number(item.price) || 0;
+		shopRecent = [item.name].concat(shopRecent.filter(function (n) { return n !== item.name; })).slice(0, 12);
+		shopSave(RECENT_KEY, shopRecent);
+		$("#shopSession").text("Bought this visit: " + shopSession.count + " · $" + shopSession.total);
 	}		
 
 	if (item.message == "addfurniturecategory") {
@@ -802,61 +923,29 @@ function rotationsnapchange(e) {
 }
 
 function showCategories() {
-    $("#furnitureList").hide();
-    $("#furnitureCategories").show();
-    $("#categoryName").text(""); 
+    shopCategory = null;
+    if (shopQuery) { shopQuery = ""; $("#searchInput").val(""); }
+    renderShop();
 }
 
 function showFurnitureList(category) {
-    $("#furnitureCategories").hide();
-    $("#furnitureList").show();
-    $("#furnitureItems").empty(); 
-
-    $("#categoryName").text(furnitureNames[category]);
-
-    furnitureData[category].forEach(item => {
-        const furnitureItem = $("<button>")
-            .addClass("furniture-item")
-            .html(`
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default.webp'">
-                <div class="furniture-name">${item.name}</div>
-                <div class="furniture-price">$${item.price}</div>
-            `)
-            .click(() => {
-				$(".buyobjecttextname").text(item.name);
-				$(".buyobjecttextprice").text('$'+item.price+'');
-				$.post('https://'+yachtresourcename+'/addnewfurnituretohouse', JSON.stringify({
-					furniturecategoryid: category,
-					furnitureid: item.id,
-				}));				
-            });
-        $("#furnitureItems").append(furnitureItem);
-    });
+    shopCategory = category;
+    renderShop();
 }
 
 function searchFurniture(query) {
-    const lowerCaseQuery = query.toLowerCase();
-
-    $(".category-button, .furniture-item").hide();
-
-    $(".category-button").each(function () {
-        const category = $(this).text().toLowerCase();
-        if (category.includes(lowerCaseQuery)) {
-            $(this).show();
-        }
-    });
-
-    $(".furniture-item").each(function () {
-        const itemName = $(this).find(".furniture-name").text().toLowerCase();
-        if (itemName.includes(lowerCaseQuery)) {
-            $(this).show();
-        }
-    });
+    shopQuery = query || "";
+    renderShop();
 }
 
 $("#searchInput").on("input", function () {
-    const query = $(this).val();
-    searchFurniture(query);
+    searchFurniture($(this).val());
+});
+$("#shopSort").on("change", function () { shopSort = $(this).val(); renderShop(); });
+$("#shopFavOnly").on("click", function () {
+    shopFavOnly = !shopFavOnly;
+    $(this).toggleClass("selected", shopFavOnly);
+    renderShop();
 });
 
 function searchFurnitureown(query) {
@@ -1459,13 +1548,68 @@ function updateFuelHud(show, value) {
     }
 }
 
+function updateHullHud(show, value) {
+    let hud = document.getElementById("hull-hud");
+    if (!hud) {
+        hud = document.createElement("div");
+        hud.id = "hull-hud";
+        hud.className = "fuel-hud-like";
+        hud.innerHTML = '<i class="fas fa-ship"></i><div class="fuel-bar"><div id="hud-hull-fill"></div></div><span id="hud-hull-text"></span>';
+        document.documentElement.appendChild(hud);
+    }
+    hud.classList.toggle("show", !!show);
+    if (show) {
+        const v = Math.max(0, Math.min(100, Number(value) || 0));
+        hud.classList.toggle("low", v <= 30);
+        document.getElementById("hud-hull-fill").style.width = v + "%";
+        document.getElementById("hud-hull-text").textContent = Math.round(v) + "%";
+    }
+}
+
 window.addEventListener('message', function (event) {
     const item = event.data;
     if (item.message == "fuelhud") updateFuelHud(item.show, item.value);
+    if (item.message == "hullhud") updateHullHud(item.show, item.value);
 });
 
 // ── Upgrades: fuel, insurance, rentals ─────────────────────
+function upDuration(sec) {
+    sec = Math.max(0, Math.floor(sec || 0));
+    const dd = Math.floor(sec / 86400), hh = Math.floor((sec % 86400) / 3600), mm = Math.floor((sec % 3600) / 60);
+    if (dd > 0) return dd + " d " + hh + " h";
+    if (hh > 0) return hh + " h " + mm + " min";
+    return Math.max(1, mm) + " min";
+}
+
+function renderUpkeepAndCondition(d) {
+    // upkeep
+    $("#up-upkeep-section").toggle(!!d.upkeep);
+    if (d.upkeep) {
+        const u = d.upkeep;
+        let text, cls = "";
+        if (u.status === "ok") text = "Covered for " + upDuration(u.seconds) + ".";
+        else if (u.status === "due") { text = "Overdue. The yacht locks in " + upDuration(u.graceDays * 86400 - u.seconds) + "."; cls = "warn"; }
+        else { text = u.action === "repossess" ? "Overdue. The yacht may be repossessed." : "Locked: the yacht cannot sail until the upkeep is paid."; cls = "bad"; }
+        text += " One payment covers " + u.intervalDays + " days" + (u.discount > 0 ? " (" + u.discount + "% marina discount applied)" : "") + ".";
+        $("#up-upkeep-text").text(text).removeClass("warn bad").addClass(cls);
+        $("#up-upkeep-pay").text("Pay upkeep · " + formatMoney(u.cost));
+    }
+    // hull condition
+    $("#up-condition-section").toggle(!!d.condition);
+    if (d.condition) {
+        const v = Math.max(0, Math.min(100, d.condition.value));
+        $("#up-cond-fill").css("width", v + "%").toggleClass("low", v <= 30);
+        let note = Math.round(v) + "% hull condition.";
+        if (v < 60) note += " Engine power is reduced.";
+        if (d.condition.insureddiscount > 0) note += " " + d.condition.insureddiscount + "% insurance discount on repairs.";
+        $("#up-cond-text").text(note);
+        $("#up-repair").text(d.condition.repairprice > 0 ? "Repair · " + formatMoney(d.condition.repairprice) : "In good shape")
+            .toggleClass("disabled", !(d.condition.repairprice > 0));
+    }
+}
+
 function renderExtras(d) {
+    renderUpkeepAndCondition(d);
     // fuel
     $("#up-fuel-section").toggle(d.fuel !== undefined && d.fuel !== null);
     if (d.fuel !== undefined && d.fuel !== null) {
@@ -1498,6 +1642,13 @@ $("#up-refuel").on("click", function () {
     if ($(this).hasClass("disabled")) return;
     $.post('https://' + yachtresourcename + '/upgraderefuel', JSON.stringify({}));
 });
+$("#up-upkeep-pay").on("click", function () {
+    comfortPost("upgradeupkeep", {});
+});
+$("#up-repair").on("click", function () {
+    if ($(this).hasClass("disabled")) return;
+    comfortPost("upgraderepair", {});
+});
 $("#up-insure").on("click", function () {
     $.post('https://' + yachtresourcename + '/upgradeinsure', JSON.stringify({}));
 });
@@ -1525,6 +1676,12 @@ function renderComfort(c) {
     const $lm = $("#up-lightmodes").empty();
     (c.lightmodes || []).forEach(function (m) {
         $('<div></div>').toggleClass("selected", m.id === c.lightmode).attr("data-mode", m.id).append($("<b>").text(m.label)).appendTo($lm);
+    });
+
+    $("#up-mood-section").toggle(!!(c.moods && c.moods.length));
+    const $mo = $("#up-moods").empty();
+    (c.moods || []).forEach(function (m) {
+        $('<div></div>').toggleClass("selected", m.id === c.mood).attr("data-mood", m.id).append($("<b>").text(m.label)).appendTo($mo);
     });
 
     $("#up-radio-section").toggle(!!c.ambience);
@@ -1571,11 +1728,16 @@ function renderComfort(c) {
         const $l = $("#up-layouts").empty();
         c.layouts.forEach(function (l, i) {
             const $d = $('<div class="tier"></div>').attr("data-layout", i + 1);
-            $d.append($("<b>").text(l.name)).append($("<small>").text(l.count + " pieces"));
+            $d.append($("<b>").text(l.name)).append($("<small>").text(l.count + " pieces" + (l.missing > 0 ? " · " + l.missing + " not owned" : "")));
             $d.append($('<div class="tier-price"></div>').text("Load"));
             $('<span class="layout-del" title="Delete">&times;</span>').attr("data-del", i + 1).appendTo($d);
+            const $a = $('<div class="layout-actions"></div>');
+            if (c.sharing) $('<span title="Get a code you can give to other players">Share</span>').attr("data-share", i + 1).appendTo($a);
+            if (l.missing > 0 && l.missingcost > 0) $('<span title="Buy the pieces you do not own yet and place everything"></span>').text("Complete · " + formatMoney(l.missingcost)).attr("data-complete", i + 1).appendTo($a);
+            if ($a.children().length) $a.appendTo($d);
             $d.appendTo($l);
         });
+        $("#up-layout-sharing").toggle(!!c.sharing);
     }
 }
 
@@ -1601,6 +1763,38 @@ $("#up-layout-save").on("click", function () { comfortPost("comfortsavelayout", 
 $(document).on("click", "#up-layouts .tier", function (e) {
     if ($(e.target).closest(".layout-del").length) return;
     comfortPost("comfortloadlayout", { index: parseInt($(this).attr("data-layout"), 10) });
+});
+$(document).on("click", "#up-moods div", function () { comfortPost("comfortmood", { mood: $(this).attr("data-mood") }); });
+$(document).on("click", "#up-layouts [data-share]", function (e) {
+    e.stopPropagation();
+    comfortPost("comfortexportlayout", { index: parseInt($(this).attr("data-share"), 10) });
+});
+$(document).on("click", "#up-layouts [data-complete]", function (e) {
+    e.stopPropagation();
+    comfortPost("comfortbuymissing", { index: parseInt($(this).attr("data-complete"), 10) });
+});
+$("#up-layout-import").on("click", function () {
+    const code = $("#up-layout-code").val().trim();
+    if (!code) { toast("Paste a layout code first.", "warning"); return; }
+    comfortPost("comfortimportlayout", { code: code });
+    $("#up-layout-code").val("");
+});
+$("#up-share-copy").on("click", function () {
+    const box = document.getElementById("up-share-code");
+    box.focus(); box.select();
+    let copied = false;
+    try { copied = document.execCommand("copy"); } catch (e) { copied = false; }
+    toast(copied ? "Code copied." : "Select the code and press Ctrl+C.", copied ? "success" : "info");
+});
+window.addEventListener('message', function (event) {
+    const item = event.data;
+    if (item.message == "layoutcode") {
+        $("#up-share-name").text("Share code for \"" + item.name + "\"");
+        $("#up-share-code").val(item.code);
+        $("#up-layout-share").show();
+        const box = document.getElementById("up-share-code");
+        if (box) { box.focus(); box.select(); }
+    }
 });
 $(document).on("click", "#up-layouts .layout-del", function (e) {
     e.stopPropagation();

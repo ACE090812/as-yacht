@@ -29,6 +29,20 @@ CreateThread(function()
 end)
 
 -- Hull lights -------------------------------------------------------------------
+-- Returns whether the hull lights are on and the colour id. The "auto" mood follows the time of day.
+function EffectiveHull(ex)
+    if ex.mood == "auto" and ex.hullowned then
+        local h = GetClockHours()
+        for _, s in ipairs((Config.Comfort or {}).moodSchedule or {}) do
+            local inside
+            if s.from <= s.to then inside = h >= s.from and h < s.to else inside = h >= s.from or h < s.to end
+            if inside then return true, s.color end
+        end
+        return false, ex.hullcolor or 1
+    end
+    return ex.hullon == true, ex.hullcolor or 1
+end
+
 hullLit = {}
 CreateThread(function()
     local cfg = Config.Comfort and Config.Comfort.hullLights
@@ -40,8 +54,10 @@ CreateThread(function()
         for id, yd in pairs(yachts) do
             local ex = yachtExtras[yd.yachtiddata]
             local main = yd.yachtmainobject
-            if ex and ex.hullon and main and DoesEntityExist(main) and #(pcoords - GetEntityCoords(main)) < (cfg.drawDistance or 160.0) then
-                local col = cfg.colors[ex.hullcolor or 1] or cfg.colors[1]
+            local on, colorId
+            if ex then on, colorId = EffectiveHull(ex) end
+            if on and main and DoesEntityExist(main) and #(pcoords - GetEntityCoords(main)) < (cfg.drawDistance or 160.0) then
+                local col = cfg.colors[colorId or 1] or cfg.colors[1]
                 hullLit[#hullLit + 1] = { entity = main, rgb = col.rgb }
             end
         end
@@ -335,6 +351,19 @@ ComfortCallback("comfortspawntender", "asyacht:Global:SpawnTender",  function(d)
 ComfortCallback("comfortsavelayout",  "asyacht:Global:SaveLayout",   function(d) return tostring(d.name or "") end)
 ComfortCallback("comfortloadlayout",  "asyacht:Global:LoadLayout",   function(d) return tonumber(d.index) end)
 ComfortCallback("comfortdeletelayout","asyacht:Global:DeleteLayout", function(d) return tonumber(d.index) end)
+ComfortCallback("comfortmood",         "asyacht:Global:SetMood",       function(d) return tostring(d.mood or "") end)
+ComfortCallback("comfortexportlayout", "asyacht:Global:ExportLayout", function(d) return tonumber(d.index) end)
+ComfortCallback("comfortimportlayout", "asyacht:Global:ImportLayout", function(d) return tostring(d.code or "") end)
+ComfortCallback("comfortbuymissing",   "asyacht:Global:LayoutBuyMissing", function(d) return tonumber(d.index) end)
+ComfortCallback("upgradeupkeep",       "asyacht:Global:PayUpkeep",    function() return nil end)
+ComfortCallback("upgraderepair",       "asyacht:Global:RepairYacht",  function() return nil end)
+
+-- The server sends the share code of a layout; the panel shows it in a box to copy.
+RegisterNetEvent("asyacht:Global:LayoutCode")
+AddEventHandler("asyacht:Global:LayoutCode", function(name, code)
+    if not isManagementMenuOpen then return end
+    SendNUIMessage({ message = "layoutcode", name = name, code = code })
+end)
 
 RegisterNUICallback("comfortHull", function(data, cb)
     cb("ok")

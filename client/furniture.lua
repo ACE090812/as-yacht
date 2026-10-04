@@ -796,3 +796,10 @@ end)
 -- ═══════════════════════════════════════════════════════════════════════════
 --  Comfort & style extras: light schedule, hull lights, radio, tender
 -- ═══════════════════════════════════════════════════════════════════════════
+
+
+-- The server confirms a purchase so the shop can show an accurate "bought this visit" total and recent list.
+RegisterNetEvent("asyacht:Global:FurniturePurchased")
+AddEventHandler("asyacht:Global:FurniturePurchased", function(model, price)
+    SendNUIMessage({ message = "furniturepurchased", name = model, price = price })
+end)

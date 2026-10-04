@@ -150,6 +150,21 @@
 			<div class="tier-list" id="up-storages"></div>
 		</div>
 
+		<div class="up-section" id="up-upkeep-section">
+			<h3>Upkeep</h3>
+			<div class="up-note" id="up-upkeep-text"></div>
+			<button class="up-buy" id="up-upkeep-pay">Pay upkeep</button>
+		</div>
+
+		<div class="up-section" id="up-condition-section">
+			<h3>Hull condition</h3>
+			<div class="fuel-bar"><div id="up-cond-fill"></div></div>
+			<div class="up-row">
+				<div class="up-note" id="up-cond-text"></div>
+				<button class="up-buy" id="up-repair">Repair</button>
+			</div>
+		</div>
+
 		<div class="up-section" id="up-fuel-section">
 			<h3>Fuel</h3>
 			<div class="fuel-bar"><div id="up-fuel-fill"></div></div>
@@ -176,6 +191,11 @@
 		</div>
 
 		<div id="up-comfort">
+			<div class="up-section" id="up-mood-section">
+				<h3>Mood</h3>
+				<div class="up-note">One click sets the light schedule, hull lights and radio. Hull lights and radio only change if you own them.</div>
+				<div class="up-options" id="up-moods"></div>
+			</div>
 			<div class="up-section">
 				<h3>Lighting schedule</h3>
 				<div class="up-options" id="up-lightmodes"></div>
@@ -203,6 +223,18 @@
 					<button class="up-buy" id="up-layout-save">Save current</button>
 				</div>
 				<div class="tier-list" id="up-layouts"></div>
+				<div id="up-layout-sharing">
+					<div class="input-label">Import a shared layout</div>
+					<div class="up-row">
+						<input type="text" id="up-layout-code" class="up-input" placeholder="Paste a layout code (ASY1:...)" autocomplete="off">
+						<button class="up-buy" id="up-layout-import">Import</button>
+					</div>
+					<div id="up-layout-share" style="display: none;">
+						<div class="input-label" id="up-share-name"></div>
+						<textarea id="up-share-code" class="up-input share-code" readonly></textarea>
+						<button class="up-buy" id="up-share-copy">Copy code</button>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -251,6 +283,16 @@
 				<i class="fas fa-magnifying-glass"></i>
 				<input type="text" id="searchInput" placeholder="Search furniture" class="search-input">
 			</div>
+			<div class="shop-toolbar" id="shopToolbar" style="display: none;">
+				<select id="shopSort" class="up-select">
+					<option value="default">Sort: default</option>
+					<option value="price-asc">Price: low to high</option>
+					<option value="price-desc">Price: high to low</option>
+					<option value="name">Name: A to Z</option>
+				</select>
+				<button class="chip" id="shopFavOnly"><i class="fas fa-star"></i> Favourites only</button>
+			</div>
+			<div class="shop-session" id="shopSession"></div>
 			<div class="furniture-categories" id="furnitureCategories"></div>
 			<div class="furniture-list" id="furnitureList" style="display: none;">
 				<div class="back-section">

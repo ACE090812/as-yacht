@@ -1522,6 +1522,7 @@ AddEventHandler("asyacht:Global:BuyFurniture", function(yachtId, categoryId, fur
                 if playerMoney >= price then
                     RemoveMoneyYacht(src, price)
                     TriggerClientEvent("asyacht:Notify", src, LanguageFile("furniturebought", price))
+                    TriggerClientEvent("asyacht:Global:FurniturePurchased", src, itemData.furnitureobject, price)
                     local uniqueFId = GetUniqueFurnitureId(yachtId)
 
                     yacht.furnitures[uniqueFId] = {

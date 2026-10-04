@@ -650,6 +650,8 @@ AddEventHandler("asyacht:Global:YachtClientMethod", function(yachtId)
 
     local nextTick = 0
     local lastFuelSent = nil
+    local lastHullSent = nil
+    local prevSpeed, nextImpact = 0.0, 0
     while drivingState.driving do
         Citizen.Wait(0)
         if not DoesEntityExist(vehicle) then break end
@@ -669,14 +671,33 @@ AddEventHandler("asyacht:Global:YachtClientMethod", function(yachtId)
             DisableControlAction(0, 71, true) -- accelerate
             DisableControlAction(0, 72, true) -- brake / reverse
         elseif engine then
-            SetVehicleCheatPowerIncrease(vehicle, engine.power or 1.0)
-            SetVehicleEngineTorqueMultiplier(vehicle, engine.torque or 1.0)
+            -- hull condition and rough seas take a share of the engine power
+            local perf = YachtPerformanceFactor(yachtId)
+            SetVehicleCheatPowerIncrease(vehicle, (engine.power or 1.0) * perf)
+            SetVehicleEngineTorqueMultiplier(vehicle, (engine.torque or 1.0) * perf)
         end
         local now = GetGameTimer()
+
+        -- hull condition gauge
+        local cond = Config.Condition and Config.Condition.enabled and yachtExtras[yachtId] and yachtExtras[yachtId].condition
+        if cond and cond ~= lastHullSent then
+            lastHullSent = cond
+            SendNUIMessage({ message = "hullhud", show = true, value = cond })
+        end
+
+        -- collisions: the server turns the reported speed into damage
+        local speed = GetEntitySpeed(vehicle)
+        if cond and now >= nextImpact and HasEntityCollidedWithAnything(vehicle)
+            and prevSpeed > (Config.Condition.impactMinSpeed or 5.0) and prevSpeed - speed > 2.0 then
+            nextImpact = now + 2500
+            TriggerServerEvent("asyacht:Global:HullImpact", yachtId, prevSpeed)
+        end
+        prevSpeed = speed
+
         if not Config.ServerNetworkYacht and now >= nextTick then
             nextTick = now + 5000
             local c, r = GetEntityCoords(vehicle), GetEntityRotation(vehicle)
-            TriggerServerEvent("asyacht:Global:DriveTick", yachtId, {x=c.x, y=c.y, z=c.z}, {x=r.x, y=r.y, z=r.z})
+            TriggerServerEvent("asyacht:Global:DriveTick", yachtId, {x=c.x, y=c.y, z=c.z}, {x=r.x, y=r.y, z=r.z}, GetSeaRoughness())
         end
         local currentDriver = GetPedInVehicleSeat(vehicle, -1)
         if currentDriver ~= playerPed then
@@ -688,6 +709,7 @@ AddEventHandler("asyacht:Global:YachtClientMethod", function(yachtId)
     drivingState.drivingid    = nil
     drivingState.yachthandler = nil
     SendNUIMessage({ message = "fuelhud", show = false })
+    SendNUIMessage({ message = "hullhud", show = false })
 
     RemoveYachtKey(vehicle, plate, GetEntityModel(vehicle))
     TaskLeaveVehicle(playerPed, vehicle, 0)

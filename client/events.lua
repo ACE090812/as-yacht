@@ -232,6 +232,12 @@ AddEventHandler("asyacht:Global:YachtExtras", function(yachtId, extras)
     yachtFuel[yachtId] = extras.fuel
 end)
 
+RegisterNetEvent("asyacht:Global:ConditionUpdate")
+AddEventHandler("asyacht:Global:ConditionUpdate", function(yachtId, condition)
+    yachtExtras[yachtId] = yachtExtras[yachtId] or {}
+    yachtExtras[yachtId].condition = condition
+end)
+
 RegisterNetEvent("asyacht:Global:FuelUpdate")
 AddEventHandler("asyacht:Global:FuelUpdate", function(yachtId, fuel)
     yachtFuel[yachtId] = fuel
