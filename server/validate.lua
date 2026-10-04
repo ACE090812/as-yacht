@@ -26,6 +26,28 @@ function ValidateYachtConfig()
     if not defaultOk then bad("Payment", "default payment '%s' is not in Config.Payment.methods", tostring(pay.default)) end
     if not inRange((Config.YachtPriceSettings or {}).yachtprice, 1, math.huge) then bad("Prices", "Config.YachtPriceSettings.yachtprice must be a positive number") end
 
+    -- storage ---------------------------------------------------------------
+    local inventories = { oxinventory = true, qsinventory = true, qbcoreinventory = true, codeminventory = true, coreinventory = true, psinventory = true, chezza = true }
+    if not inventories[tostring(Config.InventorySystem)] then
+        bad("Storage", "Config.InventorySystem '%s' is not recognised (use oxinventory, qsinventory, qbcoreinventory, codeminventory, coreinventory, psinventory or chezza): the storage rooms will do nothing", tostring(Config.InventorySystem))
+    elseif Config.InventorySystem == "oxinventory" and Config.OxInventory ~= true then
+        bad("Storage", "Config.InventorySystem is \"oxinventory\" but Config.OxInventory is not true: the storage rooms will do nothing")
+    end
+
+    -- wardrobe --------------------------------------------------------------
+    local wardrobe = ResolveWardrobeSystem(Config.WardrobeSystem)
+    if not wardrobe then
+        bad("Wardrobe", "Config.WardrobeSystem '%s' is not recognised (use illeniumappearance, fivemappearance, qbcore, rcore, esx, codem, qsappearance, auto or custom): the wardrobe will do nothing", tostring(Config.WardrobeSystem))
+    elseif wardrobe == "custom" then
+        if type(Config.CustomWardrobe) ~= "function" then bad("Wardrobe", "Config.WardrobeSystem is \"custom\" but Config.CustomWardrobe is not a function") end
+    elseif wardrobe == "auto" then
+        local found = false
+        for _, res in pairs(WARDROBE_RESOURCES) do if GetResourceState(res) == "started" then found = true end end
+        if not found then bad("Wardrobe", "\"auto\" found no supported clothing script (illenium-appearance, fivem-appearance, qb-clothing, rcore_clothes) started: use a named system or \"custom\"") end
+    elseif WARDROBE_RESOURCES[wardrobe] and GetResourceState(WARDROBE_RESOURCES[wardrobe]) ~= "started" then
+        bad("Wardrobe", "Config.WardrobeSystem is '%s' but the resource '%s' is not started (ignore this if you renamed it)", tostring(Config.WardrobeSystem), WARDROBE_RESOURCES[wardrobe])
+    end
+
     -- fuel ------------------------------------------------------------------
     local fuel = Config.Fuel or {}
     if fuel.enabled then

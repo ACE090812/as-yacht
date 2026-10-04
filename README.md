@@ -81,6 +81,11 @@ Allowed for framework admins/gods, ACE `asyacht.admin`, or the server console. N
 
 With `Config.CheckConfigOnStart = true` the server console lists mistakes in `config.lua` a few seconds after start (bad numbers, unknown mood colours or radio stations, tenders without a parking spot, overlapping marinas, harbour masters far from their marina, conflicting furniture prices and more). `/yachtcheck` runs it again, and run in game it also checks on your client that every model (yacht, tenders, marina ped, furniture) is streamed, printing the missing ones to the F8 console.
 
+## Troubleshooting
+
+* **The wardrobe prompt shows but nothing opens.** Open the F8 console: the wardrobe prints what is wrong. Set `Config.WardrobeSystem` to your clothing script (`illeniumappearance`, `fivemappearance`, `qbcore`, `rcore`, `esx`, `codem`, `qsappearance`; case, dashes and underscores are ignored), use `"auto"` to detect it, or use `"custom"` and fill in `Config.CustomWardrobe` for any other clothing script. `/yachtcheck` also reports a bad value.
+* **The storage room does nothing.** Same idea for `Config.InventorySystem` (and `Config.OxInventory = true` when using `oxinventory`).
+
 ## Exports (server)
 
 ```lua

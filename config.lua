@@ -28,8 +28,40 @@ Config.OxInventory = true
 -- Inventory script used for the storage rooms
 Config.InventorySystem = "oxinventory"
 
--- Wardrobe script used by the wardrobes on board
+-- Wardrobe script used by the wardrobes on board. Case, dashes and underscores are ignored.
+--   "illeniumappearance"  illenium-appearance          "qbcore"            qb-clothing
+--   "fivemappearance"     fivem-appearance             "rcore"             rcore_clothes
+--   "esx"                 esx_property + skinchanger   "codem"             codem-appearance
+--   "qsappearance"        qs-appearance
+--   "auto"                use the first of illenium-appearance / fivem-appearance / qb-clothing / rcore_clothes that is started
+--   "custom"              call Config.CustomWardrobe below (use this for any other clothing script)
+-- If the wardrobe does nothing, check the F8 console: it names the problem.
 Config.WardrobeSystem = "illeniumappearance"
+
+-- Used when Config.WardrobeSystem = "custom". Open your clothing script's outfit menu here, for example:
+--     TriggerEvent("my-clothing:openOutfits")      or      exports["my-clothing"]:openWardrobe()
+Config.CustomWardrobe = function(yachtId, wardrobeIndex)
+	print("[as-yacht] Config.CustomWardrobe is not filled in")
+end
+
+-- Other spellings accepted for Config.WardrobeSystem (after removing case, dashes and underscores).
+WARDROBE_ALIASES = {
+	illenium = "illeniumappearance", fivemappearance = "fivemappearance", qbclothing = "qbcore", qbcore = "qbcore",
+	rcoreclothes = "rcore", rcoreclothing = "rcore", esxskin = "esx", esxproperty = "esx", skinchanger = "esx",
+	codemappearance = "codem", codemapperance = "codem", qsappearance = "qsappearance",
+	default = "auto",
+}
+WARDROBE_SYSTEMS = { illeniumappearance = true, fivemappearance = true, qbcore = true, rcore = true, esx = true, codem = true, qsappearance = true, auto = true, custom = true }
+
+-- Resource that has to be started for each system (where the name is certain).
+WARDROBE_RESOURCES = { illeniumappearance = "illenium-appearance", fivemappearance = "fivem-appearance", qbcore = "qb-clothing", rcore = "rcore_clothes" }
+
+-- Returns the internal name for what is in Config.WardrobeSystem, or nil when it is not recognised.
+function ResolveWardrobeSystem(value)
+	local key = tostring(value or ""):lower():gsub("[^%w]", "")
+	if WARDROBE_SYSTEMS[key] then return key end
+	return WARDROBE_ALIASES[key]
+end
 
 -- true = use a target system instead of key prompts
 Config.Target = false
