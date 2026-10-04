@@ -92,6 +92,12 @@ end
 
 YachtGetNearbyPlayers = function(src, dist) return getNearbyPlayers(src, dist) end
 
+-- Server-side events other resources can listen to:  AddEventHandler("asyacht:purchased", function(yachtId, owner, price, account) end)
+-- See README.md for the full list.
+function YachtEmit(name, ...)
+    TriggerEvent("asyacht:" .. name, ...)
+end
+
 -- yachtId arrives from clients, so it can be anything. Returns an integer id, or -1 (never a valid
 -- yacht) so the usual  yachts["yacht-" .. yachtId]  lookup simply misses instead of erroring.
 function NormYachtId(v)
@@ -425,6 +431,7 @@ function CreateYachtRecord(owner, coords, rotation, o)
     yachts["yacht-" .. yachtId] = yacht
     RegisterYachtWorld(yachtId, coords, rotation)
     sendYachtToClients(-1, yacht)
+    YachtEmit("created", yachtId, owner)
     return yachtId
 end
 
@@ -569,6 +576,7 @@ function RemoveYachtFully(yachtId)
     pendingFurnitureSave[yachtId] = nil
     RemoveYachtDatabase(yachtId)
     yachts["yacht-" .. yachtId] = nil
+    YachtEmit("removed", yachtId, yacht.owner)
     return true
 end
 
@@ -579,12 +587,14 @@ function DoTransferYacht(yachtId, newIdentifier)
     local oldSrc = GetSourceByIdentifier(yacht.owner)
     local newSrc = GetSourceByIdentifier(newIdentifier)
 
+    local previousOwner = yacht.owner
     yacht.permissions[newIdentifier] = nil
     yacht.owner = newIdentifier
     updateYachtOwner(yachtId, newIdentifier)
     updateYachtPermissions(yachtId, yacht.permissions)
     if newSrc then TriggerClientEvent("asyacht:Global:CreateYachtBlip", newSrc, yachtId) end
     if oldSrc then TriggerClientEvent("asyacht:Global:RemoveYachtBlip", oldSrc, yachtId) end
+    YachtEmit("transferred", yachtId, previousOwner, newIdentifier)
     return true
 end
 
@@ -704,9 +714,18 @@ if Config.DisableYachtDrive == false then
                     TriggerClientEvent("asyacht:Notify", playersource, Language[Config.Language].outoffuel, "error")
                     return
                 end
+                -- upkeep / hull condition can stop a yacht from sailing (defined in server/upkeep.lua and server/condition.lua)
+                if YachtDriveBlocked then
+                    local blocked = YachtDriveBlocked(yacht, playersource)
+                    if blocked then
+                        TriggerClientEvent("asyacht:Notify", playersource, blocked, "error")
+                        return
+                    end
+                end
                 if GlobalState["asyacht-" .. yachtId .. "-anchored"] == true then
                     if yacht.driverid == nil then
                         yacht.driverid = playersource
+                        YachtEmit("sailStarted", yachtId, playersource)
                         if Config.ServerNetworkYacht == false then
                             TriggerClientEvent("asyacht:Global:YachtClientMethod", playersource, yachtId)
                         end
@@ -765,6 +784,7 @@ if Config.DisableYachtDrive == false then
 
                             yacht.driverid = nil
                             yacht.driverleave = false
+                            YachtEmit("anchored", yachtId, yacht.yachtcurrentanchoreddata.coords)
 
                             SetEntityRotation(GlobalState["asyacht-" .. yachtId .. "-vehhandler"], 0.0, 0.0, finalRot.z)
                             SetEntityCoords(GlobalState["asyacht-" .. yachtId .. "-vehhandler"], finalCoords.x, finalCoords.y, -4.0)
@@ -803,6 +823,7 @@ if Config.DisableYachtDrive == false then
 
                             yacht.driverid = nil
                             yacht.driverleave = false
+                            YachtEmit("anchored", yachtId, yacht.yachtcurrentanchoreddata.coords)
                             GlobalState["asyacht-" .. yachtId .. "-vehhandler"] = nil
                             GlobalState["asyacht-" .. yachtId .. "-vehid"] = nil
 
@@ -1126,6 +1147,7 @@ if Config.DisableYachtBuy == false then
         end
         LogYacht("Yacht purchased", ("%s bought yacht #%s (%s %s) for $%s (%s)"):format(
             identifier, tostring(newId), textData.uppertext, textData.bottomtext, price, account))
+        if newId then YachtEmit("purchased", newId, identifier, price, account) end
     end)
 
     RegisterServerEvent("asyacht:Global:OpenYachtBuy")
@@ -1370,7 +1392,9 @@ if Config.DisableYachtSell == false then
             local sellPrice = math.floor(CalculateYachtPrice(yacht.lighting.lightingcategory, yacht.railing.railingid, 1) * (Config.YachtPriceSettings.redemptionpercentage / 100))
             local furnitureRefund = GetFurnitureRefund(yacht)
 
+            local ownerId = yacht.owner
             if RemoveYachtFully(yachtId) then
+                YachtEmit("sold", yachtId, ownerId, sellPrice + furnitureRefund)
                 AddMoneyYacht(src, sellPrice + furnitureRefund)
                 TriggerClientEvent("asyacht:Notify", src, LanguageFile("yachtsold", sellPrice))
                 if furnitureRefund > 0 then
