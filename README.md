@@ -35,6 +35,25 @@ These depend on your map and models, so verify them once:
 * `autoPay = true` pays the fee from the owner's bank (then cash) when it falls due while they are online.
 * Pay from Manage > Upgrades, or at any harbour master.
 
+## Admin commands
+
+Allowed for framework admins/gods, ACE `asyacht.admin`, or the server console. Names can be changed in `Config.AdminCommands`.
+
+| Command | What it does |
+| --- | --- |
+| `/yachtinfo <id>` | Owner, position, anchored/sailing, marina, fuel, hull, insurance, upkeep, furniture count |
+| `/yachtupkeep <id>` | Show upkeep status |
+| `/yachtupkeep <id> forgive` | Reset the period (a full period of cover from now) |
+| `/yachtupkeep <id> days <n>` | Set the days of cover left; a negative number makes it overdue (handy for testing locks) |
+| `/yachtrepair <id>` | Free full hull repair |
+| `/yachtfuel <id> [percent]` | Set the tank (default 100) |
+| `/yachtcheck` | Re-run the configuration check and, in game, the model check |
+| `/yachtlist`, `/yachtgoto <id>`, `/yachtdelete <id>` | List, teleport to, delete |
+
+## Configuration check
+
+With `Config.CheckConfigOnStart = true` the server console lists mistakes in `config.lua` a few seconds after start (bad numbers, unknown mood colours or radio stations, tenders without a parking spot, overlapping marinas, harbour masters far from their marina, conflicting furniture prices and more). `/yachtcheck` runs it again, and run in game it also checks on your client that every model (yacht, tenders, marina ped, furniture) is streamed, printing the missing ones to the F8 console.
+
 ## Exports (server)
 
 ```lua
@@ -87,8 +106,8 @@ Set `Config.Language`. New strings live in `language/features.lua` (English); ot
 
 ```
 client/   core, appearance, buypreview, blips, init, events, buymenu, sailing, threads, nui, actions,
-          manage, furniture, comfort, marina, seastate, other
-server/   main, other, commands, upgrades, economy, extras, marina, upkeep, condition, layouts, api
+          manage, furniture, comfort, marina, seastate, validate, other
+server/   main, other, commands, upgrades, economy, extras, marina, upkeep, condition, layouts, admin, validate, api
 html/     NUI (ui.html, scripts.js, styles.css)
 ```
 

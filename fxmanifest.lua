@@ -27,6 +27,8 @@ server_scripts {
 	'server/upkeep.lua',
 	'server/condition.lua',
 	'server/layouts.lua',
+	'server/admin.lua',
+	'server/validate.lua',
 	'server/api.lua'
 }
 
@@ -51,6 +53,7 @@ client_scripts {
 	'client/comfort.lua',
 	'client/marina.lua',
 	'client/seastate.lua',
+	'client/validate.lua',
 	'client/other.lua'
 }
 

@@ -35,6 +35,10 @@ local function IsYachtAdmin(src)
     return CheckYachtGivePermission(src) == true
 end
 
+-- shared with server/admin.lua
+YachtIsAdmin = IsYachtAdmin
+YachtReply = Reply
+
 -- Validates the 8 yacht option args shared by both give commands.
 -- args order: flag, lightCategory, lightId, upperText, bottomText, railing, color, equipment
 local function ParseYachtOptions(a)

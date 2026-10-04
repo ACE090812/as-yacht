@@ -135,7 +135,17 @@ Config.GiveYachtCommand = "giveyacht"
 -- Admin command: give a yacht to an identifier (works for offline players)
 Config.GiveYachtIdentifierCommand = "giveyachtidentifier"
 
-Config.AdminCommands = { list = "yachtlist", teleport = "yachtgoto", delete = "yachtdelete" } -- admins only (group admin/god, ACE asyacht.admin, or console)
+Config.AdminCommands = { -- admins only (group admin/god, ACE asyacht.admin, or console)
+	list = "yachtlist", teleport = "yachtgoto", delete = "yachtdelete",
+	info = "yachtinfo",       -- /yachtinfo <id>                     owner, position, fuel, hull, upkeep, marina
+	upkeep = "yachtupkeep",   -- /yachtupkeep <id> [forgive|days <n>] show / reset / set the days of cover left (negative = overdue)
+	repair = "yachtrepair",   -- /yachtrepair <id>                   free full repair
+	fuel = "yachtfuel",       -- /yachtfuel <id> [percent]           set the tank (default 100)
+	check = "yachtcheck",     -- /yachtcheck                         re-run the configuration check (server console + your F8)
+}
+
+-- Check config.lua for mistakes (bad numbers, unknown ids, missing models) when the resource starts.
+Config.CheckConfigOnStart = true
 
 Config.Logging = {
 	enabled = false,
